@@ -1,0 +1,200 @@
+---
+title: "Provincial Groundwater Observation Well Network (PGOWN) summary"
+output: html_document
+---
+<!--
+Copyright 2019 Province of British Columbia
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and limitations under the License.
+-->
+
+Provincial Groundwater Observation Well Network (PGOWN) summary, by natural resource sector common operating boundaries, of the % of wells with water level data that has not been validated within the past 7 months and the average age (months) since the water level data has been validated. The target is validated data no greater than 7 months of age.
+
+```{r include = FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+
+```
+
+
+```{r setup, include=FALSE}
+
+## Load libraries
+library(readr) #load data from BC Data Catalogue
+library(readxl) #load xlsx files
+library(dplyr) # data munging
+library(envreportutils)
+library(tidyr)
+library(stringr)
+library(lubridate)
+library(gridExtra)
+library(here) 
+library(ggplot2)
+library(bcmaps)
+library(bcdata)
+library(sf)
+library(leaflet)
+library(leafpop)
+library(patchwork)
+
+
+load("tmp/welldata.RData")
+load("tmp/wellsum.RData")
+
+wells_regions <- st_transform(wells_regions, crs = 4326) # convert to lat/long
+wells_joined <- st_transform(wells_joined, crs = 4326) # convert to lat/long
+
+#indiv_plot_list <- readRDS("wells_plot_list.rds")
+reg_plot_list <- readRDS("reg_plot_list.rds")
+
+```
+
+## Provincial summaries 
+
+BLAH BLAH BLAH 
+
+
+```{r plots, include = TRUE, echo= FALSE, fig.align="center" }
+
+## Plot 2 : create overall summary with all data and years.
+p1 <- ggplot(well.table, aes(report_data, 100 - pc.gth.7)) +
+  geom_bar(stat = "identity") +
+  ylim(0,100) +
+  geom_text(aes(label=no.active.wells), vjust = -1) +
+  labs(title = "% Wells validated within 7 months",
+       x = "", y = "Percentage of active wells")
+
+p2 <-ggplot(well.table,  aes(report_data, mth.ave)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label= round(mth.ave, 0), vjust = -1))+
+  ylim(0, max(well.table$mth.ave + 0.1* max(well.table$mth.ave))) +
+  labs(title = "Average time since validation ",
+       x = "", y = "No. of months") +
+  geom_hline(yintercept=7, linetype="dashed", color = "red")
+
+  grid.arrange(p1, p2, ncol=2)
+
+```
+
+```{r months over time plot ,  include = TRUE, echo= FALSE, fig.align="center" , caption = "Average Months Since Validated with mean and standard deviation" }
+
+ggplot(well.stats, aes(report_data, mth.ave, color = Region, fill = Region, shape = Region)) +
+  facet_wrap(~Region, scales = "free")+
+  geom_pointrange(aes(ymin = mth.ave - mth.sd , ymax = mth.ave + mth.sd )) +
+  geom_line() +
+  #geom_text(aes(label=no.active.wells), vjust = -1) +
+  theme(legend.position = "none")
+
+
+```
+
+
+
+
+
+
+
+
+Click on the maps below to explore the trends across the province.
+
+# {.tabset .tabset-fade}
+
+##  Interactive map 
+
+```{r, echo = FALSE}
+ library(leaflet)
+ 
+ labs <- dplyr::select(wells_regions, Region)
+ st_geometry(labs) <- NULL
+ 
+ labs_wells <- dplyr::select(wells_joined, Location, inactive)
+  st_geometry(labs_wells) <- NULL
+ 
+ lab1 <- lapply(seq(nrow(labs)), function(i) {
+   paste0( '<b>', labs[i, "Region"],'</b>') 
+ })
+
+  lab2 <- lapply(seq(nrow(labs_wells)), function(i) {
+   paste0( '<b>', labs_wells[i, "Location"],'</b>') 
+ }) 
+
+
+  popup_reg <- popupGraph(reg_plot_list[well.stats$Region], 
+                          type = "svg", width = 500, height = 500)
+  
+# popup_indiv <- popupGraph(indiv_plot_list[well.detailed$well.name], 
+#                            type = "svg", width = 500, height = 400)
+
+ palette1 <- colorFactor(palette = 'viridis', wells_regions$Region, reverse = TRUE)
+ palette2 <- colorFactor(palette = 'viridis', wells_joined$inactive)
+ 
+ watermap <- leaflet(width = "900px", height = "600px", 
+                     options = leafletOptions(minZoom = 5)) %>%  
+   addProviderTiles(providers$Stamen.Terrain, group = "Terrain") %>%
+   add_bc_home_button() %>%
+   set_bc_view()
+ 
+watermap %>% 
+   addPolygons(data = wells_regions, 
+               stroke = T, weight = 1, color = "black", # Add border to polygons
+               fillOpacity = 0.9, # Polygon fill
+               fillColor = ~palette1(wells_regions$Region),
+               label = lapply(lab1, htmltools::HTML),
+               popup = popup_reg,
+               popupOptions = popupOptions(
+                 maxWidth = "100%", 
+                 autoPan = TRUE,
+                 keepInView = TRUE,
+                 closeOnClick = TRUE,
+                 autoPanPaddingTopLeft = c(120, 20),
+                 autoPanPaddingBottomRight = c(150,20)),
+               labelOptions = labelOptions(direction = "auto", textsize = "12px")) %>%
+   addCircles(data = wells_joined, radius = 10, 
+               #popup = popup_indiv,
+               label = lapply(lab2, htmltools::HTML),
+               #popupOptions = popupOptions(
+              #   maxWidth = "100%", 
+              #   autoPan = TRUE,
+              #   keepInView = TRUE,
+              #   closeOnClick = TRUE,
+              #   autoPanPaddingTopLeft = c(120, 20),
+              #   autoPanPaddingBottomRight = c(150,20)),
+               highlightOptions = highlightOptions( 
+                 weight = 3,
+                 color = "yellow",
+                 bringToFront = T)) 
+
+```
+
+## Blank Tab option 
+
+```{r,  map, echo = FALSE, results = "hide"}
+
+print( "this is a blank tab option as a place holder")
+
+```
+
+
+## Caveats 
+
+*This assessment was completed February 4 and 5, 2019 and is current as of this date.
+
+### Method: 
+All active PGOWN wells publicly available on the [PGOWN Interactive Map](https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=b53cb0bf3f6848e79d66ffd09b74f00d) are assessed on a region-by-region basis. The water level data is downloaded for each well and the last month that the data is categorized as validated, is noted. For each region, the % of wells in that region with validated data greater than 7 months old is determined. For each region, the average age of data is determined based on the number of wells displayed on the interactive map at the time of the snapshot and the total age (in months) of the validated data.
+
+*The number of active wells displayed on the interactive map may change from year to year as wells are added / removed from PGOWN (i.e. it is not static)
+
+*This review checks the frequency of publicly available data validation, quality of systems operations (Aquarius Database / PGOWN Interactive Map) and communications, frequency of site visits, and overall efficiency of network protocols that have been implemented. This review and report can be used as one of several metrics for overall workload of PGOWN staff.
+
+*Sites may show as ‘active’ on the map when they are inactive (no longer collecting data), new monitoring sites collecting data may not be displayed on the map at the time of the snapshot assessment.
+
+*The focus of this ‘snapshot’ is on publicly available validated groundwater level data. The monitoring sites equipped with properly working satellite telemetry equipment should still be transmitting near real time unvalidated data.
+
+
