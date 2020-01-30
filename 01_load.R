@@ -187,12 +187,10 @@ wdata <- wdata %>%
 #no.region <- wdata %>% filter(is.na(Region))
 
 
-
 # Update the names of the Regions
 wdata <- wdata %>%
  mutate(Region = ifelse(Region == "Lower Mainland", "South Coast",
                         ifelse(Region == "Vancouver Island" , "West Coast", Region)))
-
 
 ## get wells column names
 ##  https://catalogue.data.gov.bc.ca/dataset/e4731a85-ffca-4112-8caf-cb0a96905778
@@ -208,11 +206,17 @@ wdata <- wdata %>%
 #  collect()
 
 
-# Temporary fix while WMS is down
 
-wells <- read.csv
+# start of temp fix -------------------------------------------------------
+# note : temporary using a fix with a csv with lat longs while wms is down.
 
+wells <- read.csv(file.path("data","Obswell_Locations_List_Updated_Active_clean.csv")) %>%
+  mutate(OBSERVATION_WELL_NUMBER = obswellcode)%>%
+  select(x, y, OBSERVATION_WELL_NUMBER) %>%
+  st_as_sf(coords = c("x", "y"), crs = 4326) %>%
+  st_transform(., crs = 3005)
 
+# end of temp fix ---------------------------------------------------------
 
 
 
@@ -234,9 +238,8 @@ wells_regions <- st_union(wells_joined) %>%
   st_intersection(bc) %>%
   mutate()
 
-#mapview(wells_regions, zcol = "Region") +
-#  mapview(wells_joined, zcol = "Region", legend = FALSE)
-
+mapview(wells_regions, zcol = "Region") +
+  mapview(wells_joined, zcol = "Region", legend = FALSE)
 
 # export the R objects.
 
