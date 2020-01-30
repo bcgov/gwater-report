@@ -1,5 +1,6 @@
 ---
-title: "Provincial Groundwater Observation Well Network (PGOWN) summary"
+title: "Provincial Groundwater Observation Well Network (PGOWN) February 2020"
+subtitle: "Snapshot Report" 
 output: html_document
 ---
 <!--
@@ -16,7 +17,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations under the License.
 -->
 
-Provincial Groundwater Observation Well Network (PGOWN) summary, by natural resource sector common operating boundaries, of the % of wells with water level data that has not been validated within the past 7 months and the average age (months) since the water level data has been validated. The target is validated data no greater than 7 months of age.
+The Provincial Groundwater Observation Well Network Snapshot has taken place every year in February and July, since 2015. The PGOWN has been active since 1961 and is a cross-ministry long-term groundwater level monitoring commitment between the Ministry of Environment and Climate Change Strategy and the Ministry of Forests, Lands, Natural Resource Operations and Rural Development. All publicly available, active PGOWN well information from the PGOWN [Interactive Map](https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=b53cb0bf3f6848e79d66ffd09b74f00d) is assessed on a region-by-region/area-by-area basis. For this snapshot, current conditions at the time of assessment are compared to specific, established network operating standards. This assessment is part of a long established continuous-improvement model for network operations.
 
 ```{r include = FALSE}
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
@@ -56,9 +57,22 @@ reg_plot_list <- readRDS("reg_plot_list.rds")
 
 ```
 
-## Provincial summaries 
+## Provincial Snapshot 
 
 BLAH BLAH BLAH 
+
+
+```{r}
+Add provincial snap shot figures as per Jillians word doc
+```
+
+
+
+The target of publishing publicly available water level data that has been validated within the past 7 months was implemented in February 2015. The South Coast Region and the South Area implemented a full-time, dedicated Groundwater Technician in January 2016, indicated via a green dot.
+
+
+## Regional Snapshots
+
 
 
 ```{r plots, include = TRUE, echo= FALSE, fig.align="center" }
