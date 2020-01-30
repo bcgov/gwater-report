@@ -59,9 +59,6 @@ reg_plot_list <- readRDS("reg_plot_list.rds")
 
 ## Provincial Snapshot 
 
-BLAH BLAH BLAH 
-
-
 ```{r}
 Add provincial snap shot figures as per Jillians word doc
 ```
