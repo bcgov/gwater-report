@@ -24,7 +24,7 @@ library(sf)
 library(mapview)
 
 
-wfile <- file.path("process-groundwater-reporting-data/data",
+wfile <- file.path("data",
                    "MASTER_Metrics for Publicly Available PGOWN Validated Data.xlsx")
 
 #wfile <- file.path(
@@ -195,6 +195,9 @@ wdata <- wdata %>%
 
 
 ## get wells column names
+##  https://catalogue.data.gov.bc.ca/dataset/e4731a85-ffca-4112-8caf-cb0a96905778
+
+
 #bcdc_describe_feature("e4731a85-ffca-4112-8caf-cb0a96905778")
 
 # Get the wells which have an OBSERVATION_WELL_NUMBER (and thus are part of PGOWN)
@@ -237,6 +240,6 @@ wells_regions <- st_union(wells_joined) %>%
 
 # export the R objects.
 
-if (!dir.exists("process-groundwater-reporting-data/tmp")) dir.create("process-groundwater-reporting-data/tmp")
-save(list = ls(), file = "process-groundwater-reporting-data/tmp/welldata.RData")
+if (!dir.exists("tmp")) dir.create("tmp")
+save(list = ls(), file = "tmp/welldata.RData")
 

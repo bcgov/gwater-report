@@ -1,23 +1,20 @@
-<!-- 
-Add a project state badge
 
-See <https://github.com/BCDevExchange/Our-Project-Docs/blob/master/discussion/projectstates.md> 
-If you have bcgovr installed and you use RStudio, click the 'Insert BCDevex Badge' Addin.
--->
+<a id="devex-badge" rel="Exploration" href="https://github.com/BCDevExchange/assets/blob/master/README.md"><img alt="Being designed and built, but in the lab. May change, disappear, or be buggy." style="border-width:0" src="https://assets.bcdevexchange.org/images/badges/exploration.svg" title="Being designed and built, but in the lab. May change, disappear, or be buggy." /></a>
+
 
 gwater-report
 ============================
 
 ### Usage
 
-Describe data being used (links), and how to run. Eg:
+These script are used to generate twice yearly reports for the Provincial Ground Water Observation Network (PGOWN). Reports rely on raw data provided by Jillian Kelly, (Jillian.Kelly@gov.bc.ca).
 
-There are four core scripts that are required for the analysis, they need to be run in order:
+There are four core scripts that are required for the analysis and to produce the report, they need to be run in order:
 
--   01\_clean.R
--   02\_analysis.R
--   03\_visualize.R
--   04\_output.R
+-   01\_load.R
+-   02\_clean.R
+-   03\_outputs.R
+-   gwater-.Rmd
 
 #### Example
 

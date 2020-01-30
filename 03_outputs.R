@@ -15,7 +15,7 @@ library(dplyr)
 library(gridExtra)
 library(patchwork)
 
-dir.create("process-groundwater-reporting-data/output/plots", recursive = TRUE, showWarnings = FALSE)
+dir.create("output/plots", recursive = TRUE, showWarnings = FALSE)
 
 # Create and overall plot
 
@@ -97,7 +97,7 @@ plots <- for (n in reg_list) {
   reg.data <- well.stats %>% filter(Region == n)
   p <- temp_plots(reg.data)
   #name = gsub("/","_",n )
-  ggsave(p, file = paste0("process-groundwater-reporting-data/output/plots/",n, ".svg"))
+  ggsave(p, file = paste0("output/plots/",n, ".svg"))
   reg_plot_list [[n]] <- p
 }
 
@@ -155,6 +155,6 @@ p2 <-ggplot(well.table,  aes(report_data, mth.ave)) +
 #   wells_plot_list [[w]] <- p
 # }
 
-saveRDS(reg_plot_list, "process-groundwater-reporting-data/reg_plot_list.rds")
-saveRDS(wells_plot_list, "process-groundwater-reporting-data/wells_plot_list.rds")
+saveRDS(reg_plot_list, "reg_plot_list.rds")
+saveRDS(wells_plot_list, "wells_plot_list.rds")
 

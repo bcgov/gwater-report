@@ -84,6 +84,6 @@ well.table <- well.stats %>%
             pc.grad = round(mean(pc.grad, na.rm = TRUE), 0)) %>%
   mutate(pc.gth.7 = round(no.gth.7/no.active.wells*100, 0))
 
-#save(well.table, file = "process-groundwater-reporting-data/tmp/well.table.rds")
+#save(well.table, file = "tmp/well.table.rds")
 
-save(list = ls(), file = "process-groundwater-reporting-data/tmp/wellsum.RData")
+save(list = ls(), file = "tmp/wellsum.RData")
