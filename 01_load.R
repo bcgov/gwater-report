@@ -218,6 +218,7 @@ wells <- read.csv(file.path("data","Obswell_Locations_List_Updated_Active_clean.
 
 # end of temp fix ---------------------------------------------------------
 
+
 wells_joined <- right_join(wells, wdata ,
                           by = c("OBSERVATION_WELL_NUMBER" = "Well_ID"))
 
