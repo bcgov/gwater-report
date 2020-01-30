@@ -30,8 +30,8 @@ wells.df <- wells.df %>%
 
 
 well.detailed <- wells_joined %>%
-  select(c(OBSERVATION_WELL_NUMBER, WHEN_CREATED,
-           WELL_DETAIL_URL, geometry, Region, Location, Date_Validated, Months_since_val,
+  select(c(OBSERVATION_WELL_NUMBER,
+           geometry, Region, Location, Date_Validated, Months_since_val,
            initial_cost, comment, report_data , dateCheck,inactive)) %>%
   mutate(well.name = paste0("w_", OBSERVATION_WELL_NUMBER),
          report_data = ymd(report_data))
@@ -47,7 +47,7 @@ well.cost <- wells.df %>%
 well.stats  <- wells.df %>%
   group_by(Region, report_data) %>%
   filter(!inactive == "Y") %>%
-  summarise(no.active.wells = length(unique(WELL_ID)),
+  summarise(no.active.wells = length(unique(OBSERVATION_WELL_NUMBER)),
             no.gth.7 = round(sum(dateCheck > 7, na.rm = TRUE), 1),
             mth.ave = round(mean(dateCheck, na.rm = TRUE), 1),
             mth.sd = round(sd(dateCheck, na.rm = TRUE), 1),
