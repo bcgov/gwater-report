@@ -74,14 +74,14 @@ The target of publishing publicly available water level data that has been valid
 ```{r plots, include = TRUE, echo= FALSE, fig.align="center" }
 
 ## Plot 2 : create overall summary with all data and years.
-p1 <- ggplot(well.table, aes(report_data, 100 - pc.gth.7)) +
+p1 <- ggplot(well.table, aes(report_date, 100 - pc.gth.7)) +
   geom_bar(stat = "identity") +
   ylim(0,100) +
   geom_text(aes(label=no.active.wells), vjust = -1) +
   labs(title = "% Wells validated within 7 months",
        x = "", y = "Percentage of active wells")
 
-p2 <-ggplot(well.table,  aes(report_data, mth.ave)) +
+p2 <-ggplot(well.table,  aes(report_date, mth.ave)) +
   geom_bar(stat = "identity") +
   geom_text(aes(label= round(mth.ave, 0), vjust = -1))+
   ylim(0, max(well.table$mth.ave + 0.1* max(well.table$mth.ave))) +
@@ -95,7 +95,7 @@ p2 <-ggplot(well.table,  aes(report_data, mth.ave)) +
 
 ```{r months over time plot ,  include = TRUE, echo= FALSE, fig.align="center" , caption = "Average Months Since Validated with mean and standard deviation" }
 
-ggplot(well.stats, aes(report_data, mth.ave, color = Region, fill = Region, shape = Region)) +
+ggplot(well.stats, aes(report_date, mth.ave, color = Region, fill = Region, shape = Region)) +
   facet_wrap(~Region, scales = "free")+
   geom_pointrange(aes(ymin = mth.ave - mth.sd , ymax = mth.ave + mth.sd )) +
   geom_line() +

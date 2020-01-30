@@ -46,7 +46,7 @@ wdata_0219 <- read_excel(wfile, sheet = "Feb 2019", range = "A2:J228",
          Well_ID = as.integer(gsub("^#", "", Well_ID))) %>%
   fill(Region) %>%
   filter_at(.vars = vars(Data_graded, Well_ID), .vars_predicate = any_vars(!is.na(.))) %>%
-  mutate(report_data = "2019-02-01",
+  mutate(report_date = "2019-02-01",
         dateCheck = round(interval(ymd(Date_Validated),
                                          ymd("2019-02-01"))/ months(1), 0))
 
@@ -71,7 +71,7 @@ get_well_data_2020 = function(sheet, range, report_date) {
     mutate(initial_cost = as.numeric(initial_cost),
            Well_ID = as.integer(gsub("^#", "", Well_ID))) %>%
     filter_at(.vars = vars(Data_graded, Well_ID), .vars_predicate = any_vars(!is.na(.))) %>%
-    mutate(report_data = report_date,
+    mutate(report_date = report_date,
            dateCheck = round(interval(ymd(Date_Validated),
                                       ymd(report_date))/ months(1), 0)) %>%
     left_join(well_key)
@@ -95,7 +95,7 @@ get_well_data_graded = function(sheet, range, report_date) {
     mutate(initial_cost = as.numeric(initial_cost),
            Well_ID = as.integer(gsub("^#", "", Well_ID))) %>%
     filter_at(.vars = vars(Data_graded, Well_ID), .vars_predicate = any_vars(!is.na(.))) %>%
-    mutate(report_data = report_date,
+    mutate(report_date = report_date,
            dateCheck = round(interval(ymd(Date_Validated),
                                       ymd(report_date))/ months(1), 0)) %>%
     left_join(well_key)
@@ -120,7 +120,7 @@ get_well_data = function(sheet, range, report_date) {
     mutate(initial_cost = as.numeric(initial_cost),
            Well_ID = as.integer(gsub("^#", "", Well_ID))) %>%
     filter_at(.vars = vars(Well_ID), .vars_predicate = any_vars(!is.na(.))) %>%
-    mutate(report_data = report_date,
+    mutate(report_date = report_date,
            dateCheck = round(interval(ymd(Date_Validated),
                                       ymd(report_date))/ months(1), 0)) %>%
     left_join(well_key)
@@ -188,9 +188,9 @@ wdata <- wdata %>%
 
 
 # Update the names of the Regions
-wdata <- wdata %>%
- mutate(Region = ifelse(Region == "Lower Mainland", "South Coast",
-                        ifelse(Region == "Vancouver Island" , "West Coast", Region)))
+#wdata <- wdata %>%
+# mutate(Region = ifelse(Region == "Lower Mainland", "South Coast",
+#                        ifelse(Region == "Vancouver Island" , "West Coast", Region)))
 
 ## get wells column names
 ##  https://catalogue.data.gov.bc.ca/dataset/e4731a85-ffca-4112-8caf-cb0a96905778
@@ -218,7 +218,6 @@ wells <- read.csv(file.path("data","Obswell_Locations_List_Updated_Active_clean.
 
 # end of temp fix ---------------------------------------------------------
 
-# adding text
 
 wells_joined <- right_join(wells, wdata ,
                           by = c("OBSERVATION_WELL_NUMBER" = "Well_ID"))
