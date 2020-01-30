@@ -37,7 +37,7 @@ well.detailed <- wells_joined %>%
          report_data = ymd(report_data))
 
 
-# finacial start up cost
+# financial start up cost
 well.cost <- wells.df %>%
   group_by(Region, report_data) %>%
   summarise(invest_cost = sum(initial_cost, na.rm = TRUE))
