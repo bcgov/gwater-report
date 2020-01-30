@@ -59,8 +59,35 @@ reg_plot_list <- readRDS("reg_plot_list.rds")
 
 ## Provincial Snapshot 
 
-```{r}
+```{r provincial plots, include = TRUE, echo= FALSE, fig.align="center", fig.height=8}
 #Add provincial snap shot figures as per Jillians word doc
+p1 <- well.stats %>% group_by(report_data) %>% summarize(no.active = sum(no.active.wells)) %>%
+  ggplot(aes(report_data, no.active)) +
+    geom_bar(stat = "identity") +
+    ylab("Number of Active Wells") +
+    xlab("") +
+    ggtitle("Number of Active Provincial Monitoring Wells")
+
+y.lim.max <- 48
+p2 <- well.stats %>% mutate(mth.ave = if_else(mth.ave > y.lim.max, y.lim.max, mth.ave)) %>%
+ggplot(aes(report_data, mth.ave, fill = Region)) +
+  geom_col(position = "dodge") +
+  geom_hline(yintercept=7, linetype="dashed", color = "red") +
+  ylim(c(0,y.lim.max)) +
+  theme(legend.position="bottom") +
+  ylab("No of Months") +
+  xlab("") +
+  ggtitle("Average Number of Months to Validation")
+
+p3 <- ggplot(well.stats, aes(report_data, 100 - pc.gth.7, fill = Region)) +
+  geom_col(position = "dodge") +
+  ylab("%") +
+  xlab("") +
+  theme(legend.position='none') +
+  ggtitle("Percent of Wells Meeting the 7 Month Target")
+
+grid.arrange(p1, p2, p3, nrow = 3, heights = unit(c(6.5, 6.5, 6.5), units = c("cm", "cm", "cm")))
+
 ```
 
 
