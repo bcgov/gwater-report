@@ -28,11 +28,12 @@ wells.df <- wells.df %>%
 
 
 well.detailed <- wells_joined %>%
-  select(c(OBSERVATION_WELL_NUMBER, #WHEN_CREATED, WELL_DETAIL_URL,
+  select(c(OBSERVATION_WELL_NUMBER,
             geometry, Region, Location, Date_Validated, Months_since_val,
-           initial_cost, comment, report_date , dateCheck,inactive)) %>%
+           initial_cost, comment, report_data , dateCheck,inactive)) %>%
   mutate(well.name = paste0("w_", OBSERVATION_WELL_NUMBER),
-         report_date = ymd(report_date))
+         report_data = ymd(report_data))
+
 
 # financial start up cost
 well.cost <- wells.df %>%
