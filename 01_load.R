@@ -188,9 +188,9 @@ wdata <- wdata %>%
 
 
 # Update the names of the Regions
-wdata <- wdata %>%
- mutate(Region = ifelse(Region == "Lower Mainland", "South Coast",
-                        ifelse(Region == "Vancouver Island" , "West Coast", Region)))
+#wdata <- wdata %>%
+# mutate(Region = ifelse(Region == "Lower Mainland", "South Coast",
+#                        ifelse(Region == "Vancouver Island" , "West Coast", Region)))
 
 ## get wells column names
 ##  https://catalogue.data.gov.bc.ca/dataset/e4731a85-ffca-4112-8caf-cb0a96905778
@@ -217,8 +217,6 @@ wells <- read.csv(file.path("data","Obswell_Locations_List_Updated_Active_clean.
   st_transform(., crs = 3005)
 
 # end of temp fix ---------------------------------------------------------
-
-
 
 wells_joined <- right_join(wells, wdata ,
                           by = c("OBSERVATION_WELL_NUMBER" = "Well_ID"))
