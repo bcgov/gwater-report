@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-
 ## Load libraries
 library(readr) #load data from BC Data Catalogue
 library(readxl) #load xlsx files
@@ -23,31 +22,29 @@ library(lubridate)
 
 if (!exists("wells_regions")) load("tmp/welldata.RData")
 
-
 wells.df <- data.frame(wells_joined)
 wells.df <- wells.df %>%
   mutate( Region = gsub("/","_", Region))
 
 
 well.detailed <- wells_joined %>%
-  select(c(OBSERVATION_WELL_NUMBER, WHEN_CREATED,
-           WELL_DETAIL_URL, geometry, Region, Location, Date_Validated, Months_since_val,
-           initial_cost, comment, report_data , dateCheck,inactive)) %>%
+  select(c(OBSERVATION_WELL_NUMBER, #WHEN_CREATED, WELL_DETAIL_URL,
+            geometry, Region, Location, Date_Validated, Months_since_val,
+           initial_cost, comment, report_date , dateCheck,inactive)) %>%
   mutate(well.name = paste0("w_", OBSERVATION_WELL_NUMBER),
-         report_data = ymd(report_data))
-
+         report_date = ymd(report_date))
 
 # financial start up cost
 well.cost <- wells.df %>%
-  group_by(Region, report_data) %>%
+  group_by(Region, report_date) %>%
   summarise(invest_cost = sum(initial_cost, na.rm = TRUE))
 
 
 # number of wells per regions over time.
 well.stats  <- wells.df %>%
-  group_by(Region, report_data) %>%
+  group_by(Region, report_date) %>%
   filter(!inactive == "Y") %>%
-  summarise(no.active.wells = length(unique(WELL_ID)),
+  summarise(no.active.wells = length(unique(OBSERVATION_WELL_NUMBER)),
             no.gth.7 = round(sum(dateCheck > 7, na.rm = TRUE), 1),
             mth.ave = round(mean(dateCheck, na.rm = TRUE), 1),
             mth.sd = round(sd(dateCheck, na.rm = TRUE), 1),
@@ -55,8 +52,11 @@ well.stats  <- wells.df %>%
             no.grad = round(sum(as.numeric(graded), na.rm = TRUE))) %>%
   mutate(pc.gth.7 = round(no.gth.7 / no.active.wells * 100, 1),
          pc.grad = round(no.grad / no.active.wells * 100, 1),
-         report_data = ymd(report_data)) %>%
+         report_date = ymd(report_date)) %>%
   ungroup()
+
+
+no.wells <- well.stats %>%
 
 
 unique(well.stats$Region)
@@ -67,16 +67,16 @@ well.stats$Region = factor(well.stats$Region, ordered = TRUE,
 
 # format table - most recent year
 well.table.recent <- well.stats %>%
-  filter(report_data == max(report_data)) %>%
-  select(c(Region, report_data, no.active.wells, no.gth.7, pc.gth.7, mth.ave,mth.sd, no.grad, pc.grad ))
+  filter(report_date == max(report_date)) %>%
+  select(c(Region, report_date, no.active.wells, no.gth.7, pc.gth.7, mth.ave,mth.sd, no.grad, pc.grad ))
 
 
-reporting_date = max(well.stats$report_data)
+reporting_date = max(well.stats$report_date)
 
 # format table - all years
 well.table <- well.stats %>%
-  select(c(report_data, no.active.wells, no.gth.7, pc.gth.7, mth.ave, no.grad, pc.grad )) %>%
-  group_by(report_data) %>%
+  select(c(report_date, no.active.wells, no.gth.7, pc.gth.7, mth.ave, no.grad, pc.grad )) %>%
+  group_by(report_date) %>%
   summarise(no.active.wells = sum(no.active.wells),
             no.gth.7 = round(sum(no.gth.7), 1),
             mth.ave = round(mean(mth.ave, na.rm = TRUE), 1),
