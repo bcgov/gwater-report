@@ -46,13 +46,12 @@ library(leafpop)
 library(patchwork)
 
 
-load("tmp/welldata.RData")
-load("tmp/wellsum.RData")
+#load("tmp/welldata.RData")
+#load("tmp/wellsum.RData")
 
 wells_regions <- st_transform(wells_regions, crs = 4326) # convert to lat/long
 wells_joined <- st_transform(wells_joined, crs = 4326) # convert to lat/long
 
-#indiv_plot_list <- readRDS("wells_plot_list.rds")
 reg_plot_list <- readRDS("reg_plot_list.rds")
 
 ```
@@ -119,6 +118,7 @@ Click on the maps below to explore the trends across the province.
 ##  Interactive map 
 
 ```{r, echo = FALSE}
+
  library(leaflet)
  
  labs <- dplyr::select(wells_regions, Region)
@@ -136,14 +136,13 @@ Click on the maps below to explore the trends across the province.
  }) 
 
 
-  popup_reg <- popupGraph(reg_plot_list[well.stats$Region], 
-                          type = "svg", width = 500, height = 500)
+  popup_reg <- popupGraph(reg_plot_list[unique(well.stats$Region)], 
+                          type = "svg", width = 250, height = 250)
   
-# popup_indiv <- popupGraph(indiv_plot_list[well.detailed$well.name], 
-#                            type = "svg", width = 500, height = 400)
 
  palette1 <- colorFactor(palette = 'viridis', wells_regions$Region, reverse = TRUE)
- palette2 <- colorFactor(palette = 'viridis', wells_joined$inactive)
+ palette2 <-  colorNumeric(palette = "Blues", domain = wells_regions$map_colour)
+
  
  watermap <- leaflet(width = "900px", height = "600px", 
                      options = leafletOptions(minZoom = 5)) %>%  
@@ -167,6 +166,7 @@ watermap %>%
                  autoPanPaddingBottomRight = c(150,20)),
                labelOptions = labelOptions(direction = "auto", textsize = "12px")) %>%
    addCircles(data = wells_joined, radius = 10, 
+              colour ~ pallette2(map_colour),
                #popup = popup_indiv,
                label = lapply(lab2, htmltools::HTML),
                #popupOptions = popupOptions(
