@@ -29,22 +29,6 @@ ggplot(well.stats, aes(report_date, 100 - pc.gth.7,color = Region, fill = Region
   labs(title = "% Wells validated within 7 months",
        x = "", y = "Percentage of active wells")
 
-# amount of time since validates
-
-ggplot(well.stats, aes(report_date, mth.ave, color = Region, fill = Region, shape = Region)) +
- geom_pointrange(aes(ymin = mth.ave - mth.sd , ymax = mth.ave + mth.sd )) +
-  geom_line() +
-  coord_cartesian(ylim = c(0,100))
-
-
-ggplot(well.stats, aes(report_date, mth.ave, color = Region, fill = Region, shape = Region)) +
-  facet_wrap(~Region, scales = "free")+
-  geom_pointrange(aes(ymin = mth.ave - mth.sd , ymax = mth.ave + mth.sd )) +
-  geom_line() +
-  #geom_text(aes(label=no.active.wells), vjust = -1) +
-  theme(legend.position = "none")
-
-
 
 # Create Popup plots for report ------------------------------------------
 
@@ -64,31 +48,21 @@ temp_plots <- function(reg.data) {
   p1 <- ggplot(reg.data, aes(report_date, 100 - pc.gth.7)) +
     geom_bar(stat = "identity") +
     ylim(0,100) +
-    geom_text(aes(label=no.active.wells), vjust = -1) +
-    labs(title = "% Wells validated within 7 months",
-         x = "", y = "Percentage of active wells")
+   # geom_text(aes(label=no.active.wells), vjust = -1) +
+    labs(title = "% Active Well Data Validated Within 7 months",
+         x = "time", y = "Percentage of wells")
 
-  p2 <-ggplot(reg.data, aes(report_date, mth.ave)) +
-    geom_bar(stat = "identity") +
-    geom_text(aes(label= round(mth.ave, 0), vjust = -1))+
-    ylim(0, max(reg.data$mth.ave + 0.1* max(reg.data$mth.ave))) +
-    labs(title = "Average time since validation ",
-         x = "", y = "No. of months") +
-    geom_hline(yintercept=7, linetype="dashed", color = "red")
-
-  p1 / p2
+  p1
+# p2 <-ggplot(reg.data, aes(report_date, mth.ave)) +
+#    geom_bar(stat = "identity") +
+#    geom_text(aes(label= round(mth.ave, 0), vjust = -1))+
+#    ylim(0, max(reg.data$mth.ave + 0.1* max(reg.data$mth.ave))) +
+#    labs(title = "Average time since validation ",
+#         x = "", y = "No. of months") +
+#    geom_hline(yintercept=7, linetype="dashed", color = "red")
+#
+#  p1 / p2
 }
-
-
-ggplot(well.stats, aes(report_date, mth.ave, color = Region, fill = Region, shape = Region)) +
-  facet_wrap(~Region, scales = "free")+
-  geom_pointrange(aes(ymin = mth.ave - mth.sd , ymax = mth.ave + mth.sd )) +
-  geom_line() +
-  #geom_text(aes(label=no.active.wells), vjust = -1) +
-  theme(legend.position = "none")
-
-
-
 
 
 # Create ggplot graph loop
@@ -120,41 +94,6 @@ p2 <-ggplot(well.table,  aes(report_date, mth.ave)) +
   geom_hline(yintercept=7, linetype="dashed", color = "red")
 
 
-# Indiviual plots per well ---------------------------------------------------------
-#
-# # Create list of wells
-# wells_list <- unique(well.detailed$well.name)
-#
-# # Create list for plots
-# wells_plot_list <- vector(length = length(wells_list), mode = "list")
-# names(wells_plot_list) <- wells_list
-#
-#
-# indiv_plots <- function(wellid.data) {
-#   p2 <-ggplot(wellid.data, aes(report_date, dateCheck)) +
-#     geom_bar(stat = "identity") +
-#     #geom_text(aes(label= round(mth.ave, 0), vjust = -1))+
-#     ylim(0, max(wellid.data$dateCheck + 0.1* max(wellid.data$dateCheck))) +
-#     labs(title = paste0( "Validation history : ", wellid.data$Location, " (#", wellid.data$OBSERVATION_WELL_NUMBER, ")"),
-#          x = "", y = "Months") +
-#     geom_hline(yintercept=7, linetype="dashed", color = "red")
-# }
-#
-#
-# # Create ggplot graph loop
-# plots <- for (w in wells_list) {
-#  # w = wells_list[1]
-#   print(w)
-#   wellid.data <- well.detailed %>% filter(well.name == w) %>%
-#     select(c(OBSERVATION_WELL_NUMBER, Region, Location, Date_Validated,  Months_since_val, initial_cost, comment,
-#            report_date, inactive, dateCheck, well.name))
-#
-#   p <- indiv_plots(wellid.data)
-#
-#   ggsave(p, file = paste0("process-groundwater-reporting-data/output/plots/",w, ".svg"))
-#   wells_plot_list [[w]] <- p
-# }
+
 
 saveRDS(reg_plot_list, "reg_plot_list.rds")
-saveRDS(wells_plot_list, "wells_plot_list.rds")
-
