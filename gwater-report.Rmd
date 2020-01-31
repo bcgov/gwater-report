@@ -96,7 +96,7 @@ The target of publishing publicly available water level data that has been valid
 
 ## Regional Snapshots
 
-```{r plots, include = TRUE, echo= FALSE, fig.align="center" }
+```{r plots, include = TRUE, echo= FALSE, fig.align="center", fig.width=7, fig.height=3}
 #define the location of tick marks along the date axis (Feb/Jul)
 date.ticks <- unique(well.stats$report_data)
 date.ticks <- sort(date.ticks)
