@@ -121,27 +121,57 @@ Click on the maps below to explore the trends across the province.
 
  library(leaflet)
  
+
+# create labels 
+
  labs <- dplyr::select(wells_regions, Region)
  st_geometry(labs) <- NULL
  
- labs_wells <- dplyr::select(wells_joined, Location, inactive)
+ labs_wells <- dplyr::select(wells_joined, Location, inactive, OBSERVATION_WELL_NUMBER, Months_since_val )
   st_geometry(labs_wells) <- NULL
  
  lab1 <- lapply(seq(nrow(labs)), function(i) {
-   paste0( '<b>', labs[i, "Region"],'</b>') 
+   paste0( '<b>', "Region: ", labs[i, "Region"],'</b>') 
  })
-
-  lab2 <- lapply(seq(nrow(labs_wells)), function(i) {
-   paste0( '<b>', labs_wells[i, "Location"],'</b>') 
+ 
+ lab2 <- lapply(seq(nrow(labs_wells)), function(i) {
+   #ifelse(as.numeric(labs_wells[i, "Months_since_val"]) < 7, 
+          paste0( '<b>', labs_wells[i, "Location"], " (#",
+                  labs_wells[i, "OBSERVATION_WELL_NUMBER"], ")",'</b>'#, 
+   #         paste0( '<b>', labs_wells[i, "Location"], " (#",
+   #                labs_wells[i, "OBSERVATION_WELL_NUMBER"], ")", 
+   #               labs_wells[i, "Months_since_val"], "(months since validation)", '</b>')
+   )
  }) 
+ 
 
-
-  popup_reg <- popupGraph(reg_plot_list[unique(well.stats$Region)], 
-                          type = "svg", width = 250, height = 250)
+# create pop-ups
+  
+ popup_reg <- popupGraph(reg_plot_list[unique(well.stats$Region)], 
+                          type = "svg", width = 400, height = 300)
   
 
+ popup_well <- dplyr::select(wells_joined, Location, 
+                             OBSERVATION_WELL_NUMBER,
+                             Months_since_val
+                             ) %>% 
+  rename("Well Location" = Location,
+         "Well Observation No." = OBSERVATION_WELL_NUMBER,
+         "Months since Validation" = Months_since_val) %>%
+   mutate(`Months since Validation` = ifelse(as.numeric(`Months since Validation`) < 7, "<7",
+                                             `Months since Validation`))
+  
+st_geometry(popup_well) <- NULL 
+
+wells_popup <- leafpop::popupTable(popup_well ,
+                                   row.numbers = F, 
+                                   feature.id = F)
+  
+  
+  
  palette1 <- colorFactor(palette = 'viridis', wells_regions$Region, reverse = TRUE)
- palette2 <-  colorNumeric(palette = "Blues", domain = wells_regions$map_colour)
+# palette2 <-  colorFactor(palette = "Blues", domain = wells_joined$map_colour)
+ palette2 <-  colorFactor(palette = c("dark green","dark red"), levels = c("green", "red"))
 
  
  watermap <- leaflet(width = "900px", height = "600px", 
@@ -150,10 +180,11 @@ Click on the maps below to explore the trends across the province.
    add_bc_home_button() %>%
    set_bc_view()
  
-watermap %>% 
+
+ watermap %>% 
    addPolygons(data = wells_regions, 
                stroke = T, weight = 1, color = "black", # Add border to polygons
-               fillOpacity = 0.9, # Polygon fill
+               fillOpacity = 0.5, # Polygon fill
                fillColor = ~palette1(wells_regions$Region),
                label = lapply(lab1, htmltools::HTML),
                popup = popup_reg,
@@ -165,17 +196,11 @@ watermap %>%
                  autoPanPaddingTopLeft = c(120, 20),
                  autoPanPaddingBottomRight = c(150,20)),
                labelOptions = labelOptions(direction = "auto", textsize = "12px")) %>%
-   addCircles(data = wells_joined, radius = 10, 
-              colour ~ pallette2(map_colour),
-               #popup = popup_indiv,
+    addCircles(data = wells_joined, radius = 10, 
+               color = ~ palette2(map_colour),
+               fillOpacity = 1,
+               popup = wells_popup,
                label = lapply(lab2, htmltools::HTML),
-               #popupOptions = popupOptions(
-              #   maxWidth = "100%", 
-              #   autoPan = TRUE,
-              #   keepInView = TRUE,
-              #   closeOnClick = TRUE,
-              #   autoPanPaddingTopLeft = c(120, 20),
-              #   autoPanPaddingBottomRight = c(150,20)),
                highlightOptions = highlightOptions( 
                  weight = 3,
                  color = "yellow",
