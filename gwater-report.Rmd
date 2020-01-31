@@ -1,7 +1,8 @@
 ---
-title: "Provincial Groundwater Observation Well Network (PGOWN) February 2020"
-subtitle: "Snapshot Report" 
+title: "Provincial Groundwater Observation Well Network (PGOWN)"
+subtitle: "Snapshot Report : February 2020"
 output: html_document
+     
 ---
 <!--
 Copyright 2019 Province of British Columbia
@@ -46,8 +47,8 @@ library(leafpop)
 library(patchwork)
 
 
-#load("tmp/welldata.RData")
-#load("tmp/wellsum.RData")
+
+load("tmp/wellsum.RData")
 
 wells_regions <- st_transform(wells_regions, crs = 4326) # convert to lat/long
 wells_joined <- st_transform(wells_joined, crs = 4326) # convert to lat/long
@@ -56,41 +57,18 @@ reg_plot_list <- readRDS("reg_plot_list.rds")
 
 ```
 
-## Provincial Snapshot 
+### Provincial Snapshot 
 
 ```{r}
-Add provincial snap shot figures as per Jillians word doc
+#Add provincial snap shot figures as per Jillians word doc
 ```
 
 
 The target of publishing publicly available water level data that has been validated within the past 7 months was implemented in February 2015. The South Coast Region and the South Area implemented a full-time, dedicated Groundwater Technician in January 2016, indicated via a green dot.
 
 
-## Regional Snapshots
+### Regional Snapshots
 
-
-
-```{r plots, include = TRUE, echo= FALSE, fig.align="center" }
-
-## Plot 2 : create overall summary with all data and years.
-p1 <- ggplot(well.table, aes(report_date, 100 - pc.gth.7)) +
-  geom_bar(stat = "identity") +
-  ylim(0,100) +
-  geom_text(aes(label=no.active.wells), vjust = -1) +
-  labs(title = "% Wells validated within 7 months",
-       x = "", y = "Percentage of active wells")
-
-p2 <-ggplot(well.table,  aes(report_date, mth.ave)) +
-  geom_bar(stat = "identity") +
-  geom_text(aes(label= round(mth.ave, 0), vjust = -1))+
-  ylim(0, max(well.table$mth.ave + 0.1* max(well.table$mth.ave))) +
-  labs(title = "Average time since validation ",
-       x = "", y = "No. of months") +
-  geom_hline(yintercept=7, linetype="dashed", color = "red")
-
-  grid.arrange(p1, p2, ncol=2)
-
-```
 
 ```{r months over time plot ,  include = TRUE, echo= FALSE, fig.align="center" , caption = "Average Months Since Validated with mean and standard deviation" }
 
@@ -105,17 +83,12 @@ ggplot(well.stats, aes(report_date, mth.ave, color = Region, fill = Region, shap
 ```
 
 
-
-
-
-
-
-
+## Interactive Map 
 Click on the maps below to explore the trends across the province.
 
 # {.tabset .tabset-fade}
 
-##  Interactive map 
+## Map 
 
 ```{r, echo = FALSE}
 
@@ -208,18 +181,10 @@ wells_popup <- leafpop::popupTable(popup_well ,
 
 ```
 
-## Blank Tab option 
-
-```{r,  map, echo = FALSE, results = "hide"}
-
-print( "this is a blank tab option as a place holder")
-
-```
-
 
 ## Caveats 
 
-*This assessment was completed February 4 and 5, 2019 and is current as of this date.
+*This assessment was completed February 10th, 2020 and is current as of this date.
 
 ### Method: 
 All active PGOWN wells publicly available on the [PGOWN Interactive Map](https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=b53cb0bf3f6848e79d66ffd09b74f00d) are assessed on a region-by-region basis. The water level data is downloaded for each well and the last month that the data is categorized as validated, is noted. For each region, the % of wells in that region with validated data greater than 7 months old is determined. For each region, the average age of data is determined based on the number of wells displayed on the interactive map at the time of the snapshot and the total age (in months) of the validated data.
