@@ -22,17 +22,23 @@ library(lubridate)
 
 if (!exists("wells_regions")) load("tmp/welldata.RData")
 
+
+wells_joined <- wells_joined %>%
+  mutate(Region = gsub("/","_", Region),
+         Region = ifelse(Region == "Lower Mainland", "South Coast",
+            ifelse(Region == "Vancouver Island", "West Coast",
+                   ifelse(Region == "Ominca_Peace" , "Omineca_Peace", Region ))))
+
+
 wells.df <- data.frame(wells_joined)
-wells.df <- wells.df %>%
-  mutate( Region = gsub("/","_", Region))
 
 
 well.detailed <- wells_joined %>%
   select(c(OBSERVATION_WELL_NUMBER,
             geometry, Region, Location, Date_Validated, Months_since_val,
-           initial_cost, comment, report_data , dateCheck,inactive)) %>%
+           initial_cost, comment, report_date , dateCheck,inactive)) %>%
   mutate(well.name = paste0("w_", OBSERVATION_WELL_NUMBER),
-         report_data = ymd(report_data))
+         report_data = ymd(report_date))
 
 
 # financial start up cost
@@ -57,14 +63,11 @@ well.stats  <- wells.df %>%
   ungroup()
 
 
-no.wells <- well.stats %>%
 
-
-unique(well.stats$Region)
 
 well.stats$Region = factor(well.stats$Region, ordered = TRUE,
-                           levels = c("Skeena", "Ominca_Peace", "Okanagan_Kootenay","Cariboo_Thompson",
-                                      "Lower Mainland",  "Vancouver Island"))
+                           levels = c("Skeena", "Omineca_Peace", "Okanagan_Kootenay","Cariboo_Thompson",
+                                      "South Coast", "West Coast"))
 
 # format table - most recent year
 well.table.recent <- well.stats %>%
