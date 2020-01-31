@@ -22,12 +22,14 @@ library(lubridate)
 
 if (!exists("wells_regions")) load("tmp/welldata.RData")
 
+# fix regional name changes
 
 wells_joined <- wells_joined %>%
   mutate(Region = gsub("/","_", Region),
          Region = ifelse(Region == "Lower Mainland", "South Coast",
             ifelse(Region == "Vancouver Island", "West Coast",
               ifelse(Region == "Ominca_Peace" , "Omineca_Peace", Region ))))
+
 
 
 wells_regions <- wells_regions %>%
@@ -37,16 +39,7 @@ wells_regions <- wells_regions %>%
                                 ifelse(Region == "Ominca_Peace" , "Omineca_Peace", Region ))))
 
 
-
 wells.df <- data.frame(wells_joined)
-
-
-well.detailed <- wells_joined %>%
-  select(c(OBSERVATION_WELL_NUMBER,
-            geometry, Region, Location, Date_Validated, Months_since_val,
-           initial_cost, comment, report_date , dateCheck,inactive)) %>%
-  mutate(well.name = paste0("w_", OBSERVATION_WELL_NUMBER),
-         report_data = ymd(report_date))
 
 
 # financial start up cost
@@ -71,8 +64,6 @@ well.stats  <- wells.df %>%
   ungroup()
 
 
-
-
 well.stats$Region = factor(well.stats$Region, ordered = TRUE,
                            levels = c("Skeena", "Omineca_Peace", "Okanagan_Kootenay","Cariboo_Thompson",
                                       "South Coast", "West Coast"))
@@ -86,6 +77,7 @@ well.table.recent <- well.stats %>%
 reporting_date = max(well.stats$report_date)
 
 # format table - all years
+
 well.table <- well.stats %>%
   select(c(report_date, no.active.wells, no.gth.7, pc.gth.7, mth.ave, no.grad, pc.grad )) %>%
   group_by(report_date) %>%
@@ -95,6 +87,18 @@ well.table <- well.stats %>%
             #mth.sd = round(sd(mth.ave, na.rm = TRUE), 1),
             pc.grad = round(mean(pc.grad, na.rm = TRUE), 0)) %>%
   mutate(pc.gth.7 = round(no.gth.7/no.active.wells*100, 0))
+
+
+# add colour code for most recent data well location
+
+wells_joined  <- wells_joined %>%
+  group_by(OBSERVATION_WELL_NUMBER) %>%
+  filter(report_date == reporting_date & inactive == "N") %>%
+  mutate(map_colour = ifelse(dateCheck > 7, "red", "green")) %>%
+  ungroup()
+
+
+
 
 #save(well.table, file = "tmp/well.table.rds")
 
