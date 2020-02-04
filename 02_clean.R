@@ -40,9 +40,9 @@ wells_regions <- wells_regions %>%
 well.detailed <- wells_joined %>%
   select(c(OBSERVATION_WELL_NUMBER,
            geometry, Region, Location, Date_Validated, Months_since_val,
-           initial_cost, comment, report_data , dateCheck,inactive)) %>%
+           initial_cost, comment, report_date , dateCheck,inactive)) %>%
   mutate(well.name = paste0("w_", OBSERVATION_WELL_NUMBER),
-         report_data = ymd(report_data))
+         report_date = ymd(report_date))
 
 
 wells.df <- data.frame(wells_joined)
@@ -101,8 +101,6 @@ wells_joined  <- wells_joined %>%
   filter(report_date == reporting_date & inactive == "N") %>%
   mutate(map_colour = ifelse(dateCheck > 7, "red", "green")) %>%
   ungroup()
-
-
 
 
 #save(well.table, file = "tmp/well.table.rds")
