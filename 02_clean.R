@@ -10,7 +10,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
-
 ## Load libraries
 library(readr) #load data from BC Data Catalogue
 library(readxl) #load xlsx files
@@ -23,11 +22,20 @@ library(lubridate)
 
 if (!exists("wells_regions")) load("tmp/welldata.RData")
 
+# fix regional name changes
 
-wells.df <- data.frame(wells_joined)
-wells.df <- wells.df %>%
-  mutate( Region = gsub("/","_", Region))
+wells_joined <- wells_joined %>%
+  mutate(Region = gsub("/","_", Region),
+         Region = ifelse(Region == "Lower Mainland", "South Coast",
+            ifelse(Region == "Vancouver Island", "West Coast",
+              ifelse(Region == "Ominca_Peace" , "Omineca_Peace", Region ))))
 
+
+wells_regions <- wells_regions %>%
+  mutate(Region = gsub("/","_", Region),
+         Region = ifelse(Region == "Lower Mainland", "South Coast",
+                         ifelse(Region == "Vancouver Island", "West Coast",
+                                ifelse(Region == "Ominca_Peace" , "Omineca_Peace", Region ))))
 
 well.detailed <- wells_joined %>%
   select(c(OBSERVATION_WELL_NUMBER,
@@ -37,15 +45,17 @@ well.detailed <- wells_joined %>%
          report_data = ymd(report_data))
 
 
+wells.df <- data.frame(wells_joined)
+
 # financial start up cost
 well.cost <- wells.df %>%
-  group_by(Region, report_data) %>%
+  group_by(Region, report_date) %>%
   summarise(invest_cost = sum(initial_cost, na.rm = TRUE))
 
 
 # number of wells per regions over time.
 well.stats  <- wells.df %>%
-  group_by(Region, report_data) %>%
+  group_by(Region, report_date) %>%
   filter(!inactive == "Y") %>%
   summarise(no.active.wells = length(unique(OBSERVATION_WELL_NUMBER)),
             no.gth.7 = round(sum(dateCheck > 7, na.rm = TRUE), 1),
@@ -55,34 +65,45 @@ well.stats  <- wells.df %>%
             no.grad = round(sum(as.numeric(graded), na.rm = TRUE))) %>%
   mutate(pc.gth.7 = round(no.gth.7 / no.active.wells * 100, 1),
          pc.grad = round(no.grad / no.active.wells * 100, 1),
-         report_data = ymd(report_data)) %>%
+         report_date = ymd(report_date)) %>%
   ungroup()
 
 
-unique(well.stats$Region)
-
 well.stats$Region = factor(well.stats$Region, ordered = TRUE,
-                           levels = c("Skeena", "Ominca_Peace", "Okanagan_Kootenay","Cariboo_Thompson",
-                                      "Lower Mainland",  "Vancouver Island"))
+                           levels = c("Skeena", "Omineca_Peace", "Okanagan_Kootenay","Cariboo_Thompson",
+                                      "South Coast", "West Coast"))
 
 # format table - most recent year
 well.table.recent <- well.stats %>%
-  filter(report_data == max(report_data)) %>%
-  select(c(Region, report_data, no.active.wells, no.gth.7, pc.gth.7, mth.ave,mth.sd, no.grad, pc.grad ))
+  filter(report_date == max(report_date)) %>%
+  select(c(Region, report_date, no.active.wells, no.gth.7, pc.gth.7, mth.ave,mth.sd, no.grad, pc.grad ))
 
 
-reporting_date = max(well.stats$report_data)
+reporting_date = max(well.stats$report_date)
 
 # format table - all years
+
 well.table <- well.stats %>%
-  select(c(report_data, no.active.wells, no.gth.7, pc.gth.7, mth.ave, no.grad, pc.grad )) %>%
-  group_by(report_data) %>%
+  select(c(report_date, no.active.wells, no.gth.7, pc.gth.7, mth.ave, no.grad, pc.grad )) %>%
+  group_by(report_date) %>%
   summarise(no.active.wells = sum(no.active.wells),
             no.gth.7 = round(sum(no.gth.7), 1),
             mth.ave = round(mean(mth.ave, na.rm = TRUE), 1),
             #mth.sd = round(sd(mth.ave, na.rm = TRUE), 1),
             pc.grad = round(mean(pc.grad, na.rm = TRUE), 0)) %>%
   mutate(pc.gth.7 = round(no.gth.7/no.active.wells*100, 0))
+
+
+# add colour code for most recent data well location
+
+wells_joined  <- wells_joined %>%
+  group_by(OBSERVATION_WELL_NUMBER) %>%
+  filter(report_date == reporting_date & inactive == "N") %>%
+  mutate(map_colour = ifelse(dateCheck > 7, "red", "green")) %>%
+  ungroup()
+
+
+
 
 #save(well.table, file = "tmp/well.table.rds")
 

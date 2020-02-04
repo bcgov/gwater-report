@@ -1,7 +1,8 @@
 ---
-title: "Provincial Groundwater Observation Well Network (PGOWN) February 2020"
-subtitle: "Snapshot Report" 
+title: "Provincial Groundwater Observation Well Network (PGOWN)"
+subtitle: "Snapshot Report : February 2020"
 output: html_document
+     
 ---
 <!--
 Copyright 2019 Province of British Columbia
@@ -46,18 +47,17 @@ library(leafpop)
 library(patchwork)
 
 
-load("tmp/welldata.RData")
+
 load("tmp/wellsum.RData")
 
 wells_regions <- st_transform(wells_regions, crs = 4326) # convert to lat/long
 wells_joined <- st_transform(wells_joined, crs = 4326) # convert to lat/long
 
-#indiv_plot_list <- readRDS("wells_plot_list.rds")
 reg_plot_list <- readRDS("reg_plot_list.rds")
 
 ```
 
-## Provincial Snapshot 
+### Provincial Snapshot 
 
 ```{r provincial plots, include = TRUE, echo= FALSE, fig.align="center", fig.height=8}
 #Add provincial snap shot figures as per Jillians word doc
@@ -94,6 +94,7 @@ grid.arrange(p1, p2, p3, nrow = 3, heights = unit(c(6.5, 6.5, 6.5), units = c("c
 The target of publishing publicly available water level data that has been validated within the past 7 months was implemented in February 2015. The South Coast Region and the South Area implemented a full-time, dedicated Groundwater Technician in January 2016, indicated via a green dot.
 
 
+
 ## Regional Snapshots
 
 ```{r plots, include = TRUE, echo= FALSE, fig.align="center", fig.width=7, fig.height=3}
@@ -121,10 +122,11 @@ ggplot(well.table, aes(report_data, 100 - pc.gth.7)) +
 #   grid.arrange(p1, p2, ncol=2)
 
 ```
+### Regional Snapshots3
 
 ```{r months over time plot ,  include = TRUE, echo= FALSE, fig.align="center" , caption = "Average Months Since Validated with mean and standard deviation" }
 
-ggplot(well.stats, aes(report_data, mth.ave, color = Region, fill = Region, shape = Region)) +
+ggplot(well.stats, aes(report_date, mth.ave, color = Region, fill = Region, shape = Region)) +
   facet_wrap(~Region, scales = "free")+
   geom_pointrange(aes(ymin = mth.ave - mth.sd , ymax = mth.ave + mth.sd )) +
   geom_line() +
@@ -135,44 +137,69 @@ ggplot(well.stats, aes(report_data, mth.ave, color = Region, fill = Region, shap
 ```
 
 
-
-
-
-
-
-
+## Interactive Map 
 Click on the maps below to explore the trends across the province.
 
 # {.tabset .tabset-fade}
 
-##  Interactive map 
+## Map 
 
 ```{r, echo = FALSE}
+
  library(leaflet)
  
+
+# create labels 
+
  labs <- dplyr::select(wells_regions, Region)
  st_geometry(labs) <- NULL
  
- labs_wells <- dplyr::select(wells_joined, Location, inactive)
+ labs_wells <- dplyr::select(wells_joined, Location, inactive, OBSERVATION_WELL_NUMBER, Months_since_val )
   st_geometry(labs_wells) <- NULL
  
  lab1 <- lapply(seq(nrow(labs)), function(i) {
-   paste0( '<b>', labs[i, "Region"],'</b>') 
+   paste0( '<b>', "Region: ", labs[i, "Region"],'</b>') 
  })
-
-  lab2 <- lapply(seq(nrow(labs_wells)), function(i) {
-   paste0( '<b>', labs_wells[i, "Location"],'</b>') 
+ 
+ lab2 <- lapply(seq(nrow(labs_wells)), function(i) {
+   #ifelse(as.numeric(labs_wells[i, "Months_since_val"]) < 7, 
+          paste0( '<b>', labs_wells[i, "Location"], " (#",
+                  labs_wells[i, "OBSERVATION_WELL_NUMBER"], ")",'</b>'#, 
+   #         paste0( '<b>', labs_wells[i, "Location"], " (#",
+   #                labs_wells[i, "OBSERVATION_WELL_NUMBER"], ")", 
+   #               labs_wells[i, "Months_since_val"], "(months since validation)", '</b>')
+   )
  }) 
+ 
 
-
-  popup_reg <- popupGraph(reg_plot_list[well.stats$Region], 
-                          type = "svg", width = 500, height = 500)
+# create pop-ups
   
-# popup_indiv <- popupGraph(indiv_plot_list[well.detailed$well.name], 
-#                            type = "svg", width = 500, height = 400)
+ popup_reg <- popupGraph(reg_plot_list[unique(well.stats$Region)], 
+                          type = "svg", width = 400, height = 300)
+  
 
+ popup_well <- dplyr::select(wells_joined, Location, 
+                             OBSERVATION_WELL_NUMBER,
+                             Months_since_val
+                             ) %>% 
+  rename("Well Location" = Location,
+         "Well Observation No." = OBSERVATION_WELL_NUMBER,
+         "Months since Validation" = Months_since_val) %>%
+   mutate(`Months since Validation` = ifelse(as.numeric(`Months since Validation`) < 7, "<7",
+                                             `Months since Validation`))
+  
+st_geometry(popup_well) <- NULL 
+
+wells_popup <- leafpop::popupTable(popup_well ,
+                                   row.numbers = F, 
+                                   feature.id = F)
+  
+  
+  
  palette1 <- colorFactor(palette = 'viridis', wells_regions$Region, reverse = TRUE)
- palette2 <- colorFactor(palette = 'viridis', wells_joined$inactive)
+# palette2 <-  colorFactor(palette = "Blues", domain = wells_joined$map_colour)
+ palette2 <-  colorFactor(palette = c("dark green","dark red"), levels = c("green", "red"))
+
  
  watermap <- leaflet(width = "900px", height = "600px", 
                      options = leafletOptions(minZoom = 5)) %>%  
@@ -180,10 +207,11 @@ Click on the maps below to explore the trends across the province.
    add_bc_home_button() %>%
    set_bc_view()
  
-watermap %>% 
+
+ watermap %>% 
    addPolygons(data = wells_regions, 
                stroke = T, weight = 1, color = "black", # Add border to polygons
-               fillOpacity = 0.9, # Polygon fill
+               fillOpacity = 0.5, # Polygon fill
                fillColor = ~palette1(wells_regions$Region),
                label = lapply(lab1, htmltools::HTML),
                popup = popup_reg,
@@ -195,16 +223,11 @@ watermap %>%
                  autoPanPaddingTopLeft = c(120, 20),
                  autoPanPaddingBottomRight = c(150,20)),
                labelOptions = labelOptions(direction = "auto", textsize = "12px")) %>%
-   addCircles(data = wells_joined, radius = 10, 
-               #popup = popup_indiv,
+    addCircles(data = wells_joined, radius = 10, 
+               color = ~ palette2(map_colour),
+               fillOpacity = 1,
+               popup = wells_popup,
                label = lapply(lab2, htmltools::HTML),
-               #popupOptions = popupOptions(
-              #   maxWidth = "100%", 
-              #   autoPan = TRUE,
-              #   keepInView = TRUE,
-              #   closeOnClick = TRUE,
-              #   autoPanPaddingTopLeft = c(120, 20),
-              #   autoPanPaddingBottomRight = c(150,20)),
                highlightOptions = highlightOptions( 
                  weight = 3,
                  color = "yellow",
@@ -212,18 +235,10 @@ watermap %>%
 
 ```
 
-## Blank Tab option 
-
-```{r,  map, echo = FALSE, results = "hide"}
-
-print( "this is a blank tab option as a place holder")
-
-```
-
 
 ## Caveats 
 
-*This assessment was completed February 4 and 5, 2019 and is current as of this date.
+*This assessment was completed February 10th, 2020 and is current as of this date.
 
 ### Method: 
 All active PGOWN wells publicly available on the [PGOWN Interactive Map](https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=b53cb0bf3f6848e79d66ffd09b74f00d) are assessed on a region-by-region basis. The water level data is downloaded for each well and the last month that the data is categorized as validated, is noted. For each region, the % of wells in that region with validated data greater than 7 months old is determined. For each region, the average age of data is determined based on the number of wells displayed on the interactive map at the time of the snapshot and the total age (in months) of the validated data.
