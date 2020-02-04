@@ -95,5 +95,6 @@ p2 <-ggplot(well.table,  aes(report_date, mth.ave)) +
 
 
 
-
 saveRDS(reg_plot_list, "reg_plot_list.rds")
+
+

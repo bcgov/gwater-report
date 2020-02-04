@@ -31,16 +31,21 @@ wells_joined <- wells_joined %>%
               ifelse(Region == "Ominca_Peace" , "Omineca_Peace", Region ))))
 
 
-
 wells_regions <- wells_regions %>%
   mutate(Region = gsub("/","_", Region),
          Region = ifelse(Region == "Lower Mainland", "South Coast",
                          ifelse(Region == "Vancouver Island", "West Coast",
                                 ifelse(Region == "Ominca_Peace" , "Omineca_Peace", Region ))))
 
+well.detailed <- wells_joined %>%
+  select(c(OBSERVATION_WELL_NUMBER,
+           geometry, Region, Location, Date_Validated, Months_since_val,
+           initial_cost, comment, report_data , dateCheck,inactive)) %>%
+  mutate(well.name = paste0("w_", OBSERVATION_WELL_NUMBER),
+         report_data = ymd(report_data))
+
 
 wells.df <- data.frame(wells_joined)
-
 
 # financial start up cost
 well.cost <- wells.df %>%

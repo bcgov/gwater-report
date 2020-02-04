@@ -59,16 +59,70 @@ reg_plot_list <- readRDS("reg_plot_list.rds")
 
 ### Provincial Snapshot 
 
-```{r}
+```{r provincial plots, include = TRUE, echo= FALSE, fig.align="center", fig.height=8}
 #Add provincial snap shot figures as per Jillians word doc
+p1 <- well.stats %>% group_by(report_data) %>% summarize(no.active = sum(no.active.wells)) %>%
+  ggplot(aes(report_data, no.active)) +
+    geom_bar(stat = "identity") +
+    ylab("Number of Active Wells") +
+    xlab("") +
+    ggtitle("Number of Active Provincial Monitoring Wells")
+
+y.lim.max <- 48
+p2 <- well.stats %>% mutate(mth.ave = if_else(mth.ave > y.lim.max, y.lim.max, mth.ave)) %>%
+ggplot(aes(report_data, mth.ave, fill = Region)) +
+  geom_col(position = "dodge") +
+  geom_hline(yintercept=7, linetype="dashed", color = "red") +
+  ylim(c(0,y.lim.max)) +
+  theme(legend.position="bottom") +
+  ylab("No of Months") +
+  xlab("") +
+  ggtitle("Average Number of Months to Validation")
+
+p3 <- ggplot(well.stats, aes(report_data, 100 - pc.gth.7, fill = Region)) +
+  geom_col(position = "dodge") +
+  ylab("%") +
+  xlab("") +
+  theme(legend.position='none') +
+  ggtitle("Percent of Wells Meeting the 7 Month Target")
+
+grid.arrange(p1, p2, p3, nrow = 3, heights = unit(c(6.5, 6.5, 6.5), units = c("cm", "cm", "cm")))
+
 ```
 
 
 The target of publishing publicly available water level data that has been validated within the past 7 months was implemented in February 2015. The South Coast Region and the South Area implemented a full-time, dedicated Groundwater Technician in January 2016, indicated via a green dot.
 
 
-### Regional Snapshots
 
+## Regional Snapshots
+
+```{r plots, include = TRUE, echo= FALSE, fig.align="center", fig.width=7, fig.height=3}
+#define the location of tick marks along the date axis (Feb/Jul)
+date.ticks <- unique(well.stats$report_data)
+date.ticks <- sort(date.ticks)
+
+## Plot 2 : create overall summary with all data and years.
+ggplot(well.table, aes(report_data, 100 - pc.gth.7)) +
+  geom_bar(stat = "identity") +
+  ylim(0,100) +
+  scale_x_date(breaks = date.ticks, date_labels = "%b-%y")+
+  #geom_text(aes(label=no.active.wells), vjust = -1) +
+  labs(title = "% Wells validated within 7 months",
+       x = "", y = "Percentage of active wells")
+# 
+# p2 <-ggplot(well.table,  aes(report_data, mth.ave)) +
+#   geom_bar(stat = "identity") +
+#   geom_text(aes(label= round(mth.ave, 0), vjust = -1))+
+#   ylim(0, max(well.table$mth.ave + 0.1* max(well.table$mth.ave))) +
+#   labs(title = "Average time since validation ",
+#        x = "", y = "No. of months") +
+#   geom_hline(yintercept=7, linetype="dashed", color = "red")
+# 
+#   grid.arrange(p1, p2, ncol=2)
+
+```
+### Regional Snapshots3
 
 ```{r months over time plot ,  include = TRUE, echo= FALSE, fig.align="center" , caption = "Average Months Since Validated with mean and standard deviation" }
 
