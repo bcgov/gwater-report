@@ -60,9 +60,14 @@ reg_plot_list <- readRDS("reg_plot_list.rds")
 ### Provincial Snapshot 
 
 ```{r provincial plots, include = TRUE, echo= FALSE, fig.align="center", fig.height=8}
-#Add provincial snap shot figures as per Jillians word doc
-p1 <- well.stats %>% group_by(report_data) %>% summarize(no.active = sum(no.active.wells)) %>%
-  ggplot(aes(report_data, no.active)) +
+
+#define the location of tick marks along the date axis (Feb/Jul)
+date.ticks <- unique(well.stats$report_date)
+date.ticks <- sort(date.ticks)
+
+p1 <- well.stats %>% group_by(report_date) %>% summarize(no.active = sum(no.active.wells)) %>%
+  ggplot(aes(report_date, no.active)) +
+    scale_x_date(breaks = date.ticks, date_labels = "%b-%y")+
     geom_bar(stat = "identity") +
     ylab("Number of Active Wells") +
     xlab("") +
@@ -70,7 +75,7 @@ p1 <- well.stats %>% group_by(report_data) %>% summarize(no.active = sum(no.acti
 
 y.lim.max <- 48
 p2 <- well.stats %>% mutate(mth.ave = if_else(mth.ave > y.lim.max, y.lim.max, mth.ave)) %>%
-ggplot(aes(report_data, mth.ave, fill = Region)) +
+ggplot(aes(report_date, mth.ave, fill = Region)) +
   geom_col(position = "dodge") +
   geom_hline(yintercept=7, linetype="dashed", color = "red") +
   ylim(c(0,y.lim.max)) +
@@ -79,7 +84,7 @@ ggplot(aes(report_data, mth.ave, fill = Region)) +
   xlab("") +
   ggtitle("Average Number of Months to Validation")
 
-p3 <- ggplot(well.stats, aes(report_data, 100 - pc.gth.7, fill = Region)) +
+p3 <- ggplot(well.stats, aes(report_date, 100 - pc.gth.7, fill = Region)) +
   geom_col(position = "dodge") +
   ylab("%") +
   xlab("") +
@@ -99,19 +104,19 @@ The target of publishing publicly available water level data that has been valid
 
 ```{r plots, include = TRUE, echo= FALSE, fig.align="center", fig.width=7, fig.height=3}
 #define the location of tick marks along the date axis (Feb/Jul)
-date.ticks <- unique(well.stats$report_data)
+date.ticks <- unique(well.stats$report_date)
 date.ticks <- sort(date.ticks)
 
 ## Plot 2 : create overall summary with all data and years.
-ggplot(well.table, aes(report_data, 100 - pc.gth.7)) +
-  geom_bar(stat = "identity") +
-  ylim(0,100) +
-  scale_x_date(breaks = date.ticks, date_labels = "%b-%y")+
-  #geom_text(aes(label=no.active.wells), vjust = -1) +
-  labs(title = "% Wells validated within 7 months",
-       x = "", y = "Percentage of active wells")
+#ggplot(well.table, aes(report_date, 100 - pc.gth.7)) +
+#  geom_bar(stat = "identity") +
+#  ylim(0,100) +
+#  scale_x_date(breaks = date.ticks, date_labels = "%b-%y")+
+#  #geom_text(aes(label=no.active.wells), vjust = -1) +
+#  labs(title = "% Wells validated within 7 months",
+#       x = "", y = "Percentage of active wells")
 # 
-# p2 <-ggplot(well.table,  aes(report_data, mth.ave)) +
+# p2 <-ggplot(well.table,  aes(report_date, mth.ave)) +
 #   geom_bar(stat = "identity") +
 #   geom_text(aes(label= round(mth.ave, 0), vjust = -1))+
 #   ylim(0, max(well.table$mth.ave + 0.1* max(well.table$mth.ave))) +
@@ -122,7 +127,7 @@ ggplot(well.table, aes(report_data, 100 - pc.gth.7)) +
 #   grid.arrange(p1, p2, ncol=2)
 
 ```
-### Regional Snapshots3
+
 
 ```{r months over time plot ,  include = TRUE, echo= FALSE, fig.align="center" , caption = "Average Months Since Validated with mean and standard deviation" }
 

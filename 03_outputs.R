@@ -19,15 +19,12 @@ dir.create("output/plots", recursive = TRUE, showWarnings = FALSE)
 
 # Create and overall plot
 
-x <- well.stats %>%
-  filter(is.na(Region))
-
 # plot with % wells validated
-ggplot(well.stats, aes(report_date, 100 - pc.gth.7,color = Region, fill = Region, shape = Region)) +
-  geom_point() + geom_line()+
-  ylim(0,100) +
-  labs(title = "% Wells validated within 7 months",
-       x = "", y = "Percentage of active wells")
+#ggplot(well.stats, aes(report_date, 100 - pc.gth.7,color = Region, fill = Region, shape = Region)) +
+#  geom_point() + geom_line()+
+#  ylim(0,100) +
+#  labs(title = "% Wells validated within 7 months",
+#       x = "", y = "Percentage of active wells")
 
 
 # Create Popup plots for report ------------------------------------------
