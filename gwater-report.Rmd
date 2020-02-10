@@ -59,7 +59,7 @@ reg_plot_list <- readRDS("reg_plot_list.rds")
 
 ### Provincial Snapshot 
 
-```{r provincial plots, include = TRUE, echo= FALSE, fig.align="center", fig.height=8}
+```{r provincial plots, include = TRUE, echo= FALSE, fig.align="center", fig.height=8.5}
 
 #define the location of tick marks along the date axis (Feb/Jul)
 date.ticks <- unique(well.stats$report_date)
@@ -73,13 +73,12 @@ p1 <- well.stats %>% group_by(report_date) %>% summarize(no.active = sum(no.acti
     xlab("") +
     ggtitle("Number of Active Provincial Monitoring Wells")
 
-y.lim.max <- 48
-p2 <- well.stats %>% mutate(mth.ave = if_else(mth.ave > y.lim.max, y.lim.max, mth.ave)) %>%
-ggplot(aes(report_date, mth.ave, fill = Region)) +
+y.lim.max <- 50
+p2 <- ggplot(well.stats, aes(report_date, mth.ave, fill = Region)) +
   geom_col(position = "dodge") +
   geom_hline(yintercept=7, linetype="dashed", color = "red") +
-  ylim(c(0,y.lim.max)) +
-  theme(legend.position="bottom") +
+  theme(legend.position='none') +
+  coord_cartesian(ylim = c(0, y.lim.max)) +
   ylab("No of Months") +
   xlab("") +
   ggtitle("Average Number of Months to Validation")
@@ -88,10 +87,10 @@ p3 <- ggplot(well.stats, aes(report_date, 100 - pc.gth.7, fill = Region)) +
   geom_col(position = "dodge") +
   ylab("%") +
   xlab("") +
-  theme(legend.position='none') +
+  theme(legend.position="bottom") +
   ggtitle("Percent of Wells Meeting the 7 Month Target")
 
-grid.arrange(p1, p2, p3, nrow = 3, heights = unit(c(6.5, 6.5, 6.5), units = c("cm", "cm", "cm")))
+grid.arrange(p1, p2, p3, nrow = 3, heights = unit(c(6.5, 6.5, 8.5), units = c("cm", "cm", "cm")))
 
 ```
 
@@ -212,8 +211,7 @@ wells_popup <- leafpop::popupTable(popup_well ,
    add_bc_home_button() %>%
    set_bc_view()
  
-
- watermap %>% 
+   watermap %>% 
    addPolygons(data = wells_regions, 
                stroke = T, weight = 1, color = "black", # Add border to polygons
                fillOpacity = 0.5, # Polygon fill
@@ -228,16 +226,17 @@ wells_popup <- leafpop::popupTable(popup_well ,
                  autoPanPaddingTopLeft = c(120, 20),
                  autoPanPaddingBottomRight = c(150,20)),
                labelOptions = labelOptions(direction = "auto", textsize = "12px")) %>%
-    addCircles(data = wells_joined, radius = 10, 
-               color = ~ palette2(map_colour),
-               fillOpacity = 1,
+      addCircles(data = wells_joined, radius = 10, 
+               #fillColor = ~palette2(wells_joined$map_colour),
+               color = wells_joined$map_colour,
+               opacity = 0.9,
                popup = wells_popup,
                label = lapply(lab2, htmltools::HTML),
                highlightOptions = highlightOptions( 
                  weight = 3,
                  color = "yellow",
-                 bringToFront = T)) 
-
+                 bringToFront = T))
+ 
 ```
 
 
