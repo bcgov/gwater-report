@@ -80,7 +80,8 @@ well.stats$Region = factor(well.stats$Region, ordered = TRUE,
 # format table - most recent year
 well.table.recent <- well.stats %>%
   filter(report_date == max(report_date)) %>%
-  select(c(Region, report_date, no.active.wells, no.gth.7, pc.gth.7, mth.ave,mth.sd, no.grad, pc.grad ))
+  select(c(Region, report_date, no.active.wells, no.gth.7, pc.gth.7,
+           mth.ave, mth.sd, no.grad, pc.grad ))
 
 
 reporting_date = max(well.stats$report_date)
@@ -103,7 +104,8 @@ well.table <- well.stats %>%
 wells_joined  <- wells_joined %>%
   group_by(OBSERVATION_WELL_NUMBER) %>%
   filter(report_date == reporting_date & inactive == "N") %>%
-  mutate(map_colour = ifelse(dateCheck > 7, "red", "green")) %>%
+ # mutate(map_colour = ifelse(dateCheck > 7, "red", "green")) %>%
+  mutate(map_colour = ifelse(Months_since_val > 7, "red", "green")) %>%
   ungroup()
 
 
