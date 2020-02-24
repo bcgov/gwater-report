@@ -58,10 +58,14 @@ well.stats  <- wells.df %>%
   group_by(Region, report_date) %>%
   filter(!inactive == "Y") %>%
   summarise(no.active.wells = length(unique(OBSERVATION_WELL_NUMBER)),
-            no.gth.7 = round(sum(dateCheck > 7, na.rm = TRUE), 1),
-            mth.ave = round(mean(dateCheck, na.rm = TRUE), 1),
-            mth.sd = round(sd(dateCheck, na.rm = TRUE), 1),
-            mth.total = round(sum(dateCheck, na.rm = TRUE), 1),
+            #no.gth.7 = round(sum(dateCheck > 7, na.rm = TRUE), 1),
+            #mth.ave = round(mean(dateCheck, na.rm = TRUE), 1),
+            #mth.sd = round(sd(dateCheck, na.rm = TRUE), 1),
+            #mth.total = round(sum(dateCheck, na.rm = TRUE), 1),
+            no.gth.7 = round(sum(Months_since_val > 7, na.rm = TRUE), 1),
+            mth.ave = round(mean(Months_since_val, na.rm = TRUE), 1),
+            mth.sd = round(sd(Months_since_val, na.rm = TRUE), 1),
+            mth.total = round(sum(Months_since_val, na.rm = TRUE), 1),
             no.grad = round(sum(as.numeric(graded), na.rm = TRUE))) %>%
   mutate(pc.gth.7 = round(no.gth.7 / no.active.wells * 100, 1),
          pc.grad = round(no.grad / no.active.wells * 100, 1),
