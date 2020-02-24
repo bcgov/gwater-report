@@ -60,7 +60,8 @@ well_key <- wdata_0219 %>%
 get_well_data_2020 = function(sheet, range, report_date) {
   tdata <- read_excel(wfile, sheet = sheet, range = range,
                       col_names = c("Data_graded", "FTE","inactive","Well_ID", "Location",
-                                    "Date_Validated", "Months_since_val", "foo","initial_cost","foo1", "comment"),
+                                    "Date_Validated", "Months_since_val", "foo","initial_cost",
+                                    "foo1", "comment"),
                       col_types = c("text", "text", "text", "text","text", "date", "text",
                                     "text", "text", "text","text")) %>%
     select(c(Data_graded, FTE, inactive, Well_ID, Location, Date_Validated, Months_since_val,
@@ -78,7 +79,7 @@ get_well_data_2020 = function(sheet, range, report_date) {
 }
 
 
-wdata_0220 <- get_well_data_2020(sheet = "Feb 2020" , range = "E2:O237" , report_date = "2020-02-01")
+wdata_0220 <- get_well_data_2020(sheet = "Feb 2020" , range = "E2:O238" , report_date = "2020-02-01")
 
 
 # functions to format datasets (July 2018- July 2019)
@@ -133,11 +134,21 @@ wdata_0217 <- get_well_data("Feb 2017", "B2:I198", "2017-02-01" )
 wdata_0716 <- get_well_data("July 2016", "B2:I192", "2016-07-01" )
 wdata_0316 <- get_well_data("March 2016", "B2:I193", "2016-03-01" )
 wdata_0715 <- get_well_data("July 2015", "B2:I193", "2015-07-01" )
+
 wdata_0215 <- get_well_data("Feb 2015", "B2:I168", "2015-02-01" )
+
+wdata_0215 <- wdata_0215 %>%
+  mutate(Months_since_val = round(as.numeric(Months_since_val)*12,0))
 
 
 wdata <- bind_rows(wdata, wdata_0218, wdata_0717,wdata_0217,
-                   wdata_0716, wdata_0316, wdata_0215, wdata_0715)
+                   wdata_0716, wdata_0316,  wdata_0715)
+
+wdata <- wdata %>%
+  mutate(Months_since_val = as.numeric(Months_since_val))
+
+wdata <- bind_rows(wdata, wdata_0215)
+
 
 rm(wdata_0219, wdata_0218, wdata_0717,wdata_0217,
    wdata_0716, wdata_0316,wdata_0719,wdata_0718, wdata_0215, wdata_0715)
@@ -166,6 +177,8 @@ region_table <- tribble(
   "Oyster River", "Vancouver Island",
   "Shuswap","Cariboo/Thompson",
   "Yarrow", "Lower Mainland",
+  "Fort Nelson", "Ominca/Peace",
+  "Cowichan Station (Koksilah)", "Vancouver Island"
 )
 
 wdata <- wdata %>%
