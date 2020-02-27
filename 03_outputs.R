@@ -32,7 +32,7 @@ dir.create("output/plots", recursive = TRUE, showWarnings = FALSE)
 
 # Regional Plots  ---------------------------------------------------------
 
-# Create list of GBPU
+# Create list of regions
 reg_list <- unique(well.stats$Region)
 
 # Create list for plots
@@ -48,17 +48,8 @@ temp_plots <- function(reg.data) {
    # geom_text(aes(label=no.active.wells), vjust = -1) +
     labs(title = "% Active Well Data Validated Within 7 months",
          x = "time", y = "Percentage of wells")
-
   p1
-# p2 <-ggplot(reg.data, aes(report_date, mth.ave)) +
-#    geom_bar(stat = "identity") +
-#    geom_text(aes(label= round(mth.ave, 0), vjust = -1))+
-#    ylim(0, max(reg.data$mth.ave + 0.1* max(reg.data$mth.ave))) +
-#    labs(title = "Average time since validation ",
-#         x = "", y = "No. of months") +
-#    geom_hline(yintercept=7, linetype="dashed", color = "red")
-#
-#  p1 / p2
+
 }
 
 
