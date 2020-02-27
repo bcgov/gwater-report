@@ -37,20 +37,20 @@ wells_regions <- wells_regions %>%
                          ifelse(Region == "Vancouver Island", "West Coast",
                                 ifelse(Region == "Ominca_Peace" , "Omineca_Peace", Region ))))
 
-well.detailed <- wells_joined %>%
-  select(c(OBSERVATION_WELL_NUMBER,
-           geometry, Region, Location, Date_Validated, Months_since_val,
-           initial_cost, comment, report_date , dateCheck,inactive)) %>%
-  mutate(well.name = paste0("w_", OBSERVATION_WELL_NUMBER),
-         report_date = ymd(report_date))
+#well.detailed <- wells_joined %>%
+#  select(c(OBSERVATION_WELL_NUMBER,
+#           geometry, Region, Location, Date_Validated, Months_since_val,
+#           initial_cost, comment, report_date ,inactive)) %>%
+#  mutate(well.name = paste0("w_", OBSERVATION_WELL_NUMBER),
+#         report_date = ymd(report_date))
 
 
 wells.df <- data.frame(wells_joined)
 
 # financial start up cost
-well.cost <- wells.df %>%
-  group_by(Region, report_date) %>%
-  summarise(invest_cost = sum(initial_cost, na.rm = TRUE))
+#well.cost <- wells.df %>%
+#  group_by(Region, report_date) %>%
+#  summarise(invest_cost = sum(initial_cost, na.rm = TRUE))
 
 
 # number of wells per regions over time.
@@ -77,11 +77,15 @@ well.stats$Region = factor(well.stats$Region, ordered = TRUE,
                            levels = c("Skeena", "Omineca_Peace", "Okanagan_Kootenay","Cariboo_Thompson",
                                       "South Coast", "West Coast"))
 
+
+#write.csv(well.stats, file.path("out", "raw_table.csv"))
+
+
 # format table - most recent year
-well.table.recent <- well.stats %>%
-  filter(report_date == max(report_date)) %>%
-  select(c(Region, report_date, no.active.wells, no.gth.7, pc.gth.7,
-           mth.ave, mth.sd, no.grad, pc.grad ))
+#well.table.recent <- well.stats %>%
+#  filter(report_date == max(report_date)) %>%
+#  select(c(Region, report_date, no.active.wells, no.gth.7, pc.gth.7,
+#           mth.ave, mth.sd, no.grad, pc.grad ))
 
 
 reporting_date = max(well.stats$report_date)
@@ -104,7 +108,6 @@ well.table <- well.stats %>%
 wells_joined  <- wells_joined %>%
   group_by(OBSERVATION_WELL_NUMBER) %>%
   filter(report_date == reporting_date & inactive == "N") %>%
- # mutate(map_colour = ifelse(dateCheck > 7, "red", "green")) %>%
   mutate(map_colour = ifelse(Months_since_val > 7, "red", "green")) %>%
   ungroup()
 
