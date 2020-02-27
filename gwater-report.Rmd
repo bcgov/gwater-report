@@ -18,7 +18,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and limitations under the License.
 -->
 
-The Provincial Groundwater Observation Well Network Snapshot has taken place every year in February and July, since 2015. The PGOWN has been active since 1961 and is a cross-ministry long-term groundwater level monitoring commitment between the Ministry of Environment and Climate Change Strategy and the Ministry of Forests, Lands, Natural Resource Operations and Rural Development. All publicly available, active PGOWN well information from the PGOWN [Interactive Map](https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=b53cb0bf3f6848e79d66ffd09b74f00d) is assessed on a region-by-region/area-by-area basis. For this snapshot, current conditions at the time of assessment are compared to specific, established network operating standards. This assessment is part of a long established continuous-improvement model for network operations.
+The Provincial Groundwater Observation Well Network Snapshot has taken place every year around February and July, since 2015. The PGOWN has been active since 1961 and is a cross-ministry long-term groundwater level monitoring commitment between the Ministry of Environment and Climate Change Strategy and the Ministry of Forests, Lands, Natural Resource Operations and Rural Development. All publicly available, active PGOWN well information from the PGOWN [Interactive Map](https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=b53cb0bf3f6848e79d66ffd09b74f00d) is assessed on a region-by-region/area-by-area basis. For this snapshot, current conditions at the time of assessment are compared to specific, established network operating standards. This assessment is part of a long established continuous-improvement model for network operations.
 
 ```{r include = FALSE}
 knitr::opts_chunk$set(message = FALSE, warning = FALSE)
@@ -76,18 +76,21 @@ p1 <- well.stats %>% group_by(report_date) %>% summarize(no.active = sum(no.acti
 y.lim.max <- 50
 p2 <- ggplot(well.stats, aes(report_date, mth.ave, fill = Region)) +
   geom_col(position = "dodge") +
+  scale_x_date(breaks = date.ticks, date_labels = "%b-%y")+
   geom_hline(yintercept=7, linetype="dashed", color = "red") +
   theme(legend.position='none') +
   coord_cartesian(ylim = c(0, y.lim.max)) +
-  ylab("No of Months") +
+  ylab("No. of Months") +
   xlab("") +
+  theme(legend.position="right") +
   ggtitle("Average Number of Months to Validation")
 
 p3 <- ggplot(well.stats, aes(report_date, 100 - pc.gth.7, fill = Region)) +
   geom_col(position = "dodge") +
+  scale_x_date(breaks = date.ticks, date_labels = "%b-%y")+
   ylab("%") +
   xlab("") +
-  theme(legend.position="bottom") +
+  theme(legend.position="right") +
   ggtitle("Percent of Wells Meeting the 7 Month Target")
 
 grid.arrange(p1, p2, p3, nrow = 3, heights = unit(c(6.5, 6.5, 8.5), units = c("cm", "cm", "cm")))
