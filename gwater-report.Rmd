@@ -1,6 +1,6 @@
 ---
 title: "Provincial Groundwater Observation Well Network (PGOWN)"
-subtitle: "Snapshot Report : February 2020"
+subtitle: "Snapshot Report : July 2020"
 output: html_document
      
 ---
