@@ -28,6 +28,7 @@ library(gridExtra)
 library(bcdata)
 library(sf)
 library(mapview)
+library(bcmaps)
 
 wfile <- file.path("data",
                    "MASTER_Metrics for Publicly Available PGOWN Validated Data.xlsx")
