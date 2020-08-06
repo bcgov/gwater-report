@@ -10,6 +10,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and limitations under the License.
 
+
+#install.packages("bcdata")
+#library("devtools")
+#install_github("bcgov/envreportutils")
+
+
 ## Load libraries
 library(readr) #load data from BC Data Catalogue
 library(readxl) #load xlsx files
@@ -22,7 +28,6 @@ library(gridExtra)
 library(bcdata)
 library(sf)
 library(mapview)
-
 
 wfile <- file.path("data",
                    "MASTER_Metrics for Publicly Available PGOWN Validated Data.xlsx")
@@ -80,6 +85,7 @@ get_well_data_2020 = function(sheet, range, report_date) {
 
 
 wdata_0220 <- get_well_data_2020(sheet = "Feb 2020" , range = "E2:O238" , report_date = "2020-02-01")
+wdata_0720 <- get_well_data_2020(sheet = "July 2020" , range = "E2:O241" , report_date = "2020-07-01")
 
 
 # functions to format datasets (July 2018- July 2019)
@@ -105,7 +111,7 @@ get_well_data_graded = function(sheet, range, report_date) {
 wdata_0718 <- get_well_data_graded(sheet = "July 2018", range = "B2:J219", report_date = "2018-07-01")
 wdata_0719 <- get_well_data_graded(sheet = "July 2019 ", range = "E2:M236", report_date = "2019-07-01")
 
-wdata <- bind_rows(wdata_0219, wdata_0718, wdata_0719, wdata_0220)
+wdata <- bind_rows(wdata_0219, wdata_0718, wdata_0719, wdata_0220, wdata_0720)
 
 # functions to format datasets (Feb 2015 - Feb 2018)
 
@@ -149,6 +155,11 @@ wdata <- wdata %>%
 
 wdata <- bind_rows(wdata, wdata_0215)
 
+# check
+data_check <- wdata %>%
+  group_by(report_date, Region) %>%
+  summarise(n = n())
+
 
 rm(wdata_0219, wdata_0218, wdata_0717,wdata_0217,
    wdata_0716, wdata_0316,wdata_0719,wdata_0718, wdata_0215, wdata_0715)
@@ -178,7 +189,8 @@ region_table <- tribble(
   "Shuswap","Cariboo/Thompson",
   "Yarrow", "Lower Mainland",
   "Fort Nelson", "Ominca/Peace",
-  "Cowichan Station (Koksilah)", "Vancouver Island"
+  "Cowichan Station (Koksilah)", "Vancouver Island",
+  "Cowichan Station (Uphill Rd)","Vancouver Island"
 )
 
 wdata <- wdata %>%
@@ -194,16 +206,19 @@ wdata <- wdata %>%
                                 ifelse(Data_graded %in% c("not available","-"), NA, Data_graded )))) %>%
   dplyr::select(-(Data_graded))
 
-# data checks
+## data checks
 #inactive <- wdata %>% filter(inactive == "Y")
 #with.region <- wdata %>% filter(!is.na(Region))
 #no.region <- wdata %>% filter(is.na(Region))
 
+#data_check <- wdata %>%
+#  group_by(report_date, Region) %>%
+#  summarise(n = n())
 
 # Update the names of the Regions
-#wdata <- wdata %>%
-# mutate(Region = ifelse(Region == "Lower Mainland", "South Coast",
-#                        ifelse(Region == "Vancouver Island" , "West Coast", Region)))
+wdata <- wdata %>%
+ mutate(Region = ifelse(Region == "Lower Mainland", "South Coast",
+                        ifelse(Region == "Vancouver Island" , "West Coast", Region)))
 
 ## get wells column names
 ##  https://catalogue.data.gov.bc.ca/dataset/e4731a85-ffca-4112-8caf-cb0a96905778
@@ -212,28 +227,29 @@ wdata <- wdata %>%
 #bcdc_describe_feature("e4731a85-ffca-4112-8caf-cb0a96905778")
 
 # Get the wells which have an OBSERVATION_WELL_NUMBER (and thus are part of PGOWN)
-#wells <- bcdc_query_geodata("e4731a85-ffca-4112-8caf-cb0a96905778") %>%
-#  filter(!is.na(OBSERVATION_WELL_NUMBER)) %>%
-#  select(WELL_LOCATION, OBSERVATION_WELL_NUMBER, MINISTRY_OBSERVATION_WELL_STAT,
-#         WELL_DETAIL_URL) %>%
-#  collect()
+wells <- bcdc_query_geodata("e4731a85-ffca-4112-8caf-cb0a96905778") %>%
+  filter(!is.na(OBSERVATION_WELL_NUMBER)) %>%
+  select(OBSERVATION_WELL_NUMBER, #MINISTRY_OBSERVATION_WELL_STAT,
+         WELL_DETAILS_URL) %>%
+  collect() %>%
+  mutate(wells_no = as.numeric(as.character(OBSERVATION_WELL_NUMBER)))
 
 
 
 # start of temp fix -------------------------------------------------------
 # note : temporary using a fix with a csv with lat longs while wms is down.
 
-wells <- read.csv(file.path("data","Obswell_Locations_List_Updated_Active_clean.csv")) %>%
-  mutate(OBSERVATION_WELL_NUMBER = obswellcode)%>%
-  select(x, y, OBSERVATION_WELL_NUMBER) %>%
-  st_as_sf(coords = c("x", "y"), crs = 4326) %>%
-  st_transform(., crs = 3005)
+#wells <- read.csv(file.path("data","Obswell_Locations_List_Updated_Active_clean.csv")) %>%
+#  mutate(OBSERVATION_WELL_NUMBER = obswellcode)%>%
+#  select(x, y, OBSERVATION_WELL_NUMBER) %>%
+#  st_as_sf(coords = c("x", "y"), crs = 4326) %>%
+#  st_transform(., crs = 3005)
 
 # end of temp fix ---------------------------------------------------------
 
 
 wells_joined <- right_join(wells, wdata ,
-                          by = c("OBSERVATION_WELL_NUMBER" = "Well_ID"))
+                          by = c("wells_no" = "Well_ID"))
 
 
 bc <- bcmaps::bc_bound()
