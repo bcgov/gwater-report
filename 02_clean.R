@@ -28,7 +28,8 @@ wells_joined <- wells_joined %>%
   mutate(Region = gsub("/","_", Region),
          Region = ifelse(Region == "Lower Mainland", "South Coast",
             ifelse(Region == "Vancouver Island", "West Coast",
-              ifelse(Region == "Ominca_Peace" , "Omineca_Peace", Region ))))
+              ifelse(Region == "Ominca_Peace" , "Omineca_Peace", Region )))) %>%
+  select(-c(GW_WW_SYSID, WELL_DETAILS_URL))
 
 
 wells_regions <- wells_regions %>%
