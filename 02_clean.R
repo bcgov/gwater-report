@@ -22,7 +22,7 @@ library(lubridate)
 
 if (!exists("wells_regions")) load("tmp/welldata.RData")
 
-# fix regional name changes
+# update regional name changes
 
 wells_joined <- wells_joined %>%
   mutate(Region = gsub("/","_", Region),
@@ -53,16 +53,16 @@ wells.df <- data.frame(wells_joined)
 #  group_by(Region, report_date) %>%
 #  summarise(invest_cost = sum(initial_cost, na.rm = TRUE))
 
+#wells.check <- wells.df %>%
+#  group_by(inactive) %>%
+#  summarise(no = n())
+
 
 # number of wells per regions over time.
 well.stats  <- wells.df %>%
   group_by(Region, report_date) %>%
   filter(!inactive == "Y") %>%
   summarise(no.active.wells = length(unique(OBSERVATION_WELL_NUMBER)),
-            #no.gth.7 = round(sum(dateCheck > 7, na.rm = TRUE), 1),
-            #mth.ave = round(mean(dateCheck, na.rm = TRUE), 1),
-            #mth.sd = round(sd(dateCheck, na.rm = TRUE), 1),
-            #mth.total = round(sum(dateCheck, na.rm = TRUE), 1),
             no.gth.7 = round(sum(Months_since_val > 7, na.rm = TRUE), 1),
             mth.ave = round(mean(Months_since_val, na.rm = TRUE), 1),
             mth.sd = round(sd(Months_since_val, na.rm = TRUE), 1),
@@ -103,7 +103,6 @@ well.table <- well.stats %>%
             pc.grad = round(mean(pc.grad, na.rm = TRUE), 0)) %>%
   mutate(pc.gth.7 = round(no.gth.7/no.active.wells*100, 0))
 
-
 # add colour code for most recent data well location
 
 wells_joined  <- wells_joined %>%
@@ -111,8 +110,5 @@ wells_joined  <- wells_joined %>%
   filter(report_date == reporting_date & inactive == "N") %>%
   mutate(map_colour = ifelse(Months_since_val > 7, "red", "green")) %>%
   ungroup()
-
-
-#save(well.table, file = "tmp/well.table.rds")
 
 save(list = ls(), file = "tmp/wellsum.RData")
