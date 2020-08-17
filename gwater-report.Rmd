@@ -1,6 +1,6 @@
 ---
 title: "Provincial Groundwater Observation Well Network (PGOWN)"
-subtitle: "Snapshot Report : July 2020"
+subtitle: "Snapshot Report : August 2020"
 output: html_document
      
 ---
@@ -115,13 +115,31 @@ The target of publishing publicly available water level data that has been valid
 
 ```{r months over time plot ,  include = TRUE, echo= FALSE, fig.align="leftr" , caption = "Average Months Since Validated with mean and standard deviation" }
 
-ggplot(well.stats, aes(report_date, mth.ave, color = Region, fill = Region, shape = Region)) +
-  facet_wrap(~Region, scales = "free")+
-  geom_pointrange(aes(ymin = mth.ave - mth.sd , ymax = mth.ave + mth.sd )) +
+grad.yrs = c("2020-02-01","2020-07-01","2019-02-01","2019-07-01")
+
+library(lubridate)
+
+graded_data <- well.stats %>%
+  mutate(report_yr = year(report_date)) %>%
+  filter(report_yr > 2018)
+
+ggplot(graded_data, aes(report_date, pc.grad, color = Region, fill = Region, shape = Region)) +
+  facet_wrap(~Region)+
   geom_line() +
-  ylab("No. of Months") +
+  ylab("% Graded") +
   xlab("") +
   theme(legend.position = "none")
+
+
+# original plot 
+
+#ggplot(well.stats, aes(report_date, mth.ave, color = Region, fill = Region, #shape = Region)) +
+#  facet_wrap(~Region, scales = "free")+
+#  geom_pointrange(aes(ymin = mth.ave - mth.sd , ymax = mth.ave + mth.sd )) +
+#  geom_line() +
+#  ylab("No. of Months") +
+#  xlab("") +
+#  theme(legend.position = "none")
 
 ```
 
@@ -227,7 +245,7 @@ wells_popup <- leafpop::popupTable(popup_well ,
 
 ## Caveats 
 
-*This assessment was completed February 10th, 2020 and is current as of this date.
+*This assessment was completed July 10th, 2020 and is current as of this date.
 
 ### Method: 
 All active PGOWN wells publicly available on the [PGOWN Interactive Map](https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=b53cb0bf3f6848e79d66ffd09b74f00d) are assessed on a region-by-region basis. The water level data is downloaded for each well and the last month that the data is categorized as validated, is noted. For each region, the % of wells in that region with validated data greater than 7 months old is determined. For each region, the average age of data is determined based on the number of wells displayed on the interactive map at the time of the snapshot and the total age (in months) of the validated data.
