@@ -212,9 +212,9 @@ wdata <- wdata %>%
 #with.region <- wdata %>% filter(!is.na(Region))
 #no.region <- wdata %>% filter(is.na(Region))
 
-#data_check <- wdata %>%
-#  group_by(report_date, Region) %>%
-#  summarise(n = n())
+data_check <- wdata %>%
+  group_by(report_date, Region) %>%
+  summarise(n = n())
 
 # Update the names of the Regions
 wdata <- wdata %>%
@@ -234,7 +234,6 @@ wells <- bcdc_query_geodata("e4731a85-ffca-4112-8caf-cb0a96905778") %>%
          WELL_DETAILS_URL) %>%
   collect() %>%
   mutate(wells_no = as.numeric(as.character(OBSERVATION_WELL_NUMBER)))
-
 
 
 # start of temp fix -------------------------------------------------------
