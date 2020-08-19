@@ -74,7 +74,7 @@ p1 <- well.stats %>% group_by(report_date) %>% summarize(no.active = sum(no.acti
 p1
 ```
 
-```{r provincial plots 2, include = TRUE, echo= FALSE, fig.align="left", fig.height=3, fig.width = 8, fig.cap="INSERT TITLE HERE"}
+```{r provincial plots 2, include = TRUE, echo= FALSE, fig.align="left", fig.height=3, fig.width = 8}
 y.lim.max <- 50
 p2 <- ggplot(well.stats, aes(report_date, mth.ave, fill = Region)) +
   geom_col(position = "dodge") +
@@ -82,16 +82,16 @@ p2 <- ggplot(well.stats, aes(report_date, mth.ave, fill = Region)) +
   geom_hline(yintercept=7, linetype="dashed", color = "red") +
   theme(legend.position='none') +
   coord_cartesian(ylim = c(0, y.lim.max)) +
-  ylab("No. of Months") +
+  ylab("Number of Months") +
   xlab("") +
   theme(legend.position="right") +
-  ggtitle("Average Number of Months to Validation")
+  ggtitle("Average Number of Months Since Water Level Data Validation")
 p2
 ```
 
-text place holder 
+* The red dashed line on the graph above indicates the 7 month data validation target. 
 
-```{r provincial plots 3, include = TRUE, echo= FALSE, fig.align="left", fig.height= 3, fig.width = 8, fig.cap="INSERT 2nd TITLE HERE"}
+```{r provincial plots 3, include = TRUE, echo= FALSE, fig.align="left", fig.height= 3, fig.width = 8}
 p3 <- ggplot(well.stats, aes(report_date, 100 - pc.gth.7, fill = Region)) +
   geom_col(position = "dodge") +
   scale_x_date(breaks = date.ticks, date_labels = "%b-%y")+
@@ -106,40 +106,27 @@ p3
 ```
 
 
-The target of publishing publicly available water level data that has been validated within the past 7 months was implemented in February 2015. The South Coast Region and the South Area implemented a full-time, dedicated Groundwater Technician in January 2016.
+The target of publishing publicly available water level data that has been validated within the past 7 months was implemented in February 2015. The South Coast Region and the South Area (Okanagan_Kootenay) implemented a full-time, dedicated Groundwater Technician in January 2016. The West Coast Region has had a full-time, dedicated Groundwater Technician since 2006.
 
 
-
-## Regional Snapshots
-
-
-```{r months over time plot ,  include = TRUE, echo= FALSE, fig.align="leftr" , caption = "Average Months Since Validated with mean and standard deviation" }
-
-grad.yrs = c("2020-02-01","2020-07-01","2019-02-01","2019-07-01")
+```{r months over time plot ,  include = TRUE, echo= FALSE, fig.align="leftr"  }
 
 library(lubridate)
 
 graded_data <- well.stats %>%
   mutate(report_yr = year(report_date)) %>%
-  filter(report_yr > 2018)
+  filter(report_yr > 2019)
 
-ggplot(graded_data, aes(report_date, pc.grad, color = Region, fill = Region, shape = Region)) +
-  facet_wrap(~Region)+
-  geom_line() +
-  ylab("% Graded") +
+p4 <- ggplot(graded_data, aes(report_date, 100 - pc.gth.7, color = Region, fill = Region)) +
+  geom_col(position = "dodge") +
+  scale_x_date(breaks = date.ticks, date_labels = "%b-%y")+
+  ylab("%") +
   xlab("") +
-  theme(legend.position = "none")
+  theme(legend.position="right") +
+  ggtitle("Percent of Wells With Graded Water Level Data")
 
+p4
 
-# original plot 
-
-#ggplot(well.stats, aes(report_date, mth.ave, color = Region, fill = Region, #shape = Region)) +
-#  facet_wrap(~Region, scales = "free")+
-#  geom_pointrange(aes(ymin = mth.ave - mth.sd , ymax = mth.ave + mth.sd )) +
-#  geom_line() +
-#  ylab("No. of Months") +
-#  xlab("") +
-#  theme(legend.position = "none")
 
 ```
 
@@ -245,7 +232,7 @@ wells_popup <- leafpop::popupTable(popup_well ,
 
 ## Caveats 
 
-*This assessment was completed July 10th, 2020 and is current as of this date.
+*This assessment was completed July 7 and 8, 2020 and is current as of this date.
 
 ### Method: 
 All active PGOWN wells publicly available on the [PGOWN Interactive Map](https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=b53cb0bf3f6848e79d66ffd09b74f00d) are assessed on a region-by-region basis. The water level data is downloaded for each well and the last month that the data is categorized as validated, is noted. For each region, the % of wells in that region with validated data greater than 7 months old is determined. For each region, the average age of data is determined based on the number of wells displayed on the interactive map at the time of the snapshot and the total age (in months) of the validated data.
@@ -257,5 +244,7 @@ All active PGOWN wells publicly available on the [PGOWN Interactive Map](https:/
 *Sites may show as ‘active’ on the map when they are inactive (no longer collecting data), new monitoring sites collecting data may not be displayed on the map at the time of the snapshot assessment.
 
 *The focus of this ‘snapshot’ is on publicly available validated groundwater level data. The monitoring sites equipped with properly working satellite telemetry equipment should still be transmitting near real time unvalidated data.
+
+*July 2020 Snapshot: The COVID-19 world-wide pandemic was declared in March 2020. The presence of this virus disrupted both office work and field work which may have resulted in delayed site visits to the PGOWN wells, resulting in wells not meeting data targets.
 
 
