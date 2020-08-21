@@ -85,13 +85,17 @@ p2 <- ggplot(well.stats, aes(report_date, mth.ave, fill = Region)) +
   ylab("Number of Months") +
   xlab("") +
   theme(legend.position="right") +
-  ggtitle("Average Number of Months Since Water Level Data Validation")
+  ggtitle("Average Number of Months Since Water Level Data Validation", 
+          subtitle = "Red dashed line indicates 7 month data validation target"
+          )
+
 p2
 ```
 
-* The red dashed line on the graph above indicates the 7 month data validation target. 
+
 
 ```{r provincial plots 3, include = TRUE, echo= FALSE, fig.align="left", fig.height= 3, fig.width = 8}
+
 p3 <- ggplot(well.stats, aes(report_date, 100 - pc.gth.7, fill = Region)) +
   geom_col(position = "dodge") +
   scale_x_date(breaks = date.ticks, date_labels = "%b-%y")+
@@ -117,7 +121,7 @@ graded_data <- well.stats %>%
   mutate(report_yr = year(report_date)) %>%
   filter(report_yr > 2019)
 
-p4 <- ggplot(graded_data, aes(report_date, 100 - pc.gth.7, color = Region, fill = Region)) +
+p4 <- ggplot(graded_data, aes(report_date, pc.grad, color = Region, fill = Region)) +
   geom_col(position = "dodge") +
   scale_x_date(breaks = date.ticks, date_labels = "%b-%y")+
   ylab("%") +
