@@ -76,25 +76,29 @@ p1
 
 ```{r provincial plots 2, include = TRUE, echo= FALSE, fig.align="left", fig.height=3, fig.width = 8}
 y.lim.max <- 50
+
 p2 <- ggplot(well.stats, aes(report_date, mth.ave, fill = Region)) +
   geom_col(position = "dodge") +
   scale_x_date(breaks = date.ticks, date_labels = "%b-%y")+
-  geom_hline(yintercept=7, linetype="dashed", color = "red") +
+  geom_hline(aes(yintercept=7, linetype="7 month validation target"), color = "red") +
   theme(legend.position='none') +
   coord_cartesian(ylim = c(0, y.lim.max)) +
   ylab("Number of Months") +
   xlab("") +
   theme(legend.position="right") +
-  ggtitle("Average Number of Months Since Water Level Data Validation", 
-          subtitle = "Red dashed line indicates 7 month data validation target"
+  ggtitle("Average Number of Months Since Water Level Data Validation"
           )
 
-p2
+ p2 + 
+#   annotate("text",y=10,x=max(well.stats$report_date),size=20,label=c('target', colour = "red"))
+ scale_linetype_manual(name = "", values = c(2, 2), 
+                      guide = guide_legend(override.aes = list(color = c("red"))))
+
 ```
 
 
 
-```{r provincial plots 3, include = TRUE, echo= FALSE, fig.align="left", fig.height= 3, fig.width = 8}
+```{r provincial plots 3, include = TRUE, echo= FALSE, fig.align="left", fig.height= 2.5, fig.width = 8}
 
 p3 <- ggplot(well.stats, aes(report_date, 100 - pc.gth.7, fill = Region)) +
   geom_col(position = "dodge") +
@@ -113,7 +117,7 @@ p3
 The target of publishing publicly available water level data that has been validated within the past 7 months was implemented in February 2015. The South Coast Region and the South Area (Okanagan_Kootenay) implemented a full-time, dedicated Groundwater Technician in January 2016. The West Coast Region has had a full-time, dedicated Groundwater Technician since 2006.
 
 
-```{r months over time plot ,  include = TRUE, echo= FALSE, fig.align="leftr"  }
+```{r months over time plot ,  include = TRUE, echo= FALSE, fig.align="centre" , fig.height=3, fig.width = 6 }
 
 library(lubridate)
 
