@@ -86,14 +86,13 @@ p2 <- ggplot(well.stats, aes(report_date, mth.ave, fill = Region)) +
   ylab("Number of Months") +
   xlab("") +
   theme(legend.position="right") +
-  ggtitle("Average Number of Months Since Water Level Data Validation"
-          )
-
+  ggtitle("Average Number of Months Since Water Level Data Validation")+
+  scale_fill_brewer(palette = "Set1") #(values=wes_palette(n=3,
+        
  p2 + 
 #   annotate("text",y=10,x=max(well.stats$report_date),size=20,label=c('target', colour = "red"))
  scale_linetype_manual(name = "", values = c(2, 2), 
-                      guide = guide_legend(override.aes = list(color = c("red"))))
-
+                      guide = guide_legend(override.aes = list(color = c("red")))) 
 ```
 
 
@@ -106,7 +105,9 @@ p3 <- ggplot(well.stats, aes(report_date, 100 - pc.gth.7, fill = Region)) +
   ylab("%") +
   xlab("") +
   theme(legend.position="right") +
-  ggtitle("Percent of Wells Meeting the 7 Month Target")
+  ggtitle("Percent of Wells Meeting the 7 Month Target")+
+  scale_fill_brewer(palette = "Set2") #(values=wes_palette(n=3,
+    
 
 p3
 
@@ -131,7 +132,10 @@ p4 <- ggplot(graded_data, aes(report_date, pc.grad, color = Region, fill = Regio
   ylab("%") +
   xlab("") +
   theme(legend.position="right") +
-  ggtitle("Percent of Wells With Graded Water Level Data")
+  ggtitle("Percent of Wells With Graded Water Level Data") +
+  scale_fill_brewer(palette = "Accent") #(values=wes_palette(n=3,
+      
+
 
 p4
 
