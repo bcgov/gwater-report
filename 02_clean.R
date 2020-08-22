@@ -38,25 +38,8 @@ wells_regions <- wells_regions %>%
                          ifelse(Region == "Vancouver Island", "West Coast",
                                 ifelse(Region == "Ominca_Peace" , "Omineca_Peace", Region ))))
 
-#well.detailed <- wells_joined %>%
-#  select(c(OBSERVATION_WELL_NUMBER,
-#           geometry, Region, Location, Date_Validated, Months_since_val,
-#           initial_cost, comment, report_date ,inactive)) %>%
-#  mutate(well.name = paste0("w_", OBSERVATION_WELL_NUMBER),
-#         report_date = ymd(report_date))
-
 
 wells.df <- data.frame(wells_joined)
-
-# financial start up cost
-#well.cost <- wells.df %>%
-#  group_by(Region, report_date) %>%
-#  summarise(invest_cost = sum(initial_cost, na.rm = TRUE))
-
-#wells.check <- wells.df %>%
-#  group_by(inactive) %>%
-#  summarise(no = n())
-
 
 # number of wells per regions over time.
 well.stats  <- wells.df %>%
