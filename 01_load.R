@@ -212,9 +212,9 @@ wdata <- wdata %>%
 #with.region <- wdata %>% filter(!is.na(Region))
 #no.region <- wdata %>% filter(is.na(Region))
 
-data_check <- wdata %>%
-  group_by(report_date, Region) %>%
-  summarise(n = n())
+#data_check <- wdata %>%
+#  group_by(report_date, Region) %>%
+#  summarise(n = n())
 
 # Update the names of the Regions
 wdata <- wdata %>%
@@ -247,11 +247,24 @@ wells <- bcdc_query_geodata("e4731a85-ffca-4112-8caf-cb0a96905778") %>%
 
 # end of temp fix ---------------------------------------------------------
 
-
 wells_joined <- right_join(wells, wdata ,
                           by = c("wells_no" = "Well_ID"))
 
+##Note the well # 365 Shuswamp Lake Park Deep has two GPS locations in the file.
+##As the map is a course scale - selecting the first
 
+duplicate <- wells_joined %>%
+  group_by(wells_no, report_date) %>%
+  summarise(count = n()) %>%
+  filter(count >1)
+
+# this has uncovered more problems with the data as to error in names and duplicate
+# well id values
+wells_joined <- wells_joined %>%
+  filter(!OBJECTID == 18024672)
+
+#wells_joined <- full_join(wells, wdata ,
+#                           by = c("wells_no" = "Well_ID"))
 bc <- bcmaps::bc_bound()
 
 # Create regions based on voronoi tessalation around well locations, grouped by
