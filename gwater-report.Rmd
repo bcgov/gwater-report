@@ -70,7 +70,8 @@ p1 <- well.stats %>% group_by(report_date) %>% summarize(no.active = sum(no.acti
     geom_bar(stat = "identity") +
     ylab("Number of Active Wells") +
     xlab("") +
-    ggtitle("Number of Active Provincial Monitoring Wells")
+    ggtitle("Number of Active Provincial Monitoring Wells") + 
+    scale_fill_brewer(palette = "accent")
 p1
 ```
 
@@ -106,7 +107,7 @@ p3 <- ggplot(well.stats, aes(report_date, 100 - pc.gth.7, fill = Region)) +
   xlab("") +
   theme(legend.position="right") +
   ggtitle("Percent of Wells Meeting the 7 Month Target")+
-  scale_fill_brewer(palette = "Set2") #(values=wes_palette(n=3,
+  scale_fill_brewer(palette = "Accent") #(values=wes_palette(n=3,
     
 
 p3
@@ -127,7 +128,7 @@ graded_data <- well.stats %>%
   filter(report_yr > 2019)
 
 p4 <- ggplot(graded_data, aes(report_date, pc.grad, color = Region, fill = Region)) +
-  geom_col(position = "dodge") +
+  geom_col(position = "dodge", colour = NA) +
   scale_x_date(breaks = date.ticks, date_labels = "%b-%y")+
   ylab("%") +
   xlab("") +
