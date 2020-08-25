@@ -88,7 +88,7 @@ p2 <- ggplot(well.stats, aes(report_date, mth.ave, fill = Region)) +
   xlab("") +
   theme(legend.position="right") +
   ggtitle("Average Number of Months Since Water Level Data Validation")+
-  scale_fill_brewer(palette = "Set1") #(values=wes_palette(n=3,
+  scale_fill_brewer(palette = "Accent") #(values=wes_palette(n=3,
         
  p2 + 
 #   annotate("text",y=10,x=max(well.stats$report_date),size=20,label=c('target', colour = "red"))
