@@ -79,7 +79,7 @@ p1
 y.lim.max <- 50
 
 p2 <- ggplot(well.stats, aes(report_date, mth.ave, fill = Region)) +
-  geom_col(position = "dodge") +
+  geom_col(position = "dodge", colour = "black") +
   scale_x_date(breaks = date.ticks, date_labels = "%b-%y")+
   geom_hline(aes(yintercept=7, linetype="7 month validation target"), color = "red") +
   theme(legend.position='none') +
@@ -101,14 +101,14 @@ p2 <- ggplot(well.stats, aes(report_date, mth.ave, fill = Region)) +
 ```{r provincial plots 3, include = TRUE, echo= FALSE, fig.align="left", fig.height= 2.5, fig.width = 8}
 
 p3 <- ggplot(well.stats, aes(report_date, 100 - pc.gth.7, fill = Region)) +
-  geom_col(position = "dodge") +
+  geom_col(position = "dodge", colour = "black") +
   scale_x_date(breaks = date.ticks, date_labels = "%b-%y")+
   ylab("%") +
   xlab("") +
   theme(legend.position="right") +
   ggtitle("Percent of Wells Meeting the 7 Month Target")+
-  scale_fill_brewer(palette = "Accent") #(values=wes_palette(n=3,
-    
+  scale_fill_brewer(palette = "Accent") + #(values=wes_palette(n=3,
+  ylim(0,100)
 
 p3
 
@@ -128,7 +128,7 @@ graded_data <- well.stats %>%
   filter(report_yr > 2019)
 
 p4 <- ggplot(graded_data, aes(report_date, pc.grad, color = Region, fill = Region)) +
-  geom_col(position = "dodge", colour = NA) +
+  geom_col(position = "dodge", colour = "black") +
   scale_x_date(breaks = date.ticks, date_labels = "%b-%y")+
   ylab("%") +
   xlab("") +
@@ -142,6 +142,8 @@ p4
 
 
 ```
+
+Grading of water level data was implemented in January 2016.
 
 
 ## Interactive Map 
