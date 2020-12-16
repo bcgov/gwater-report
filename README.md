@@ -7,7 +7,7 @@ gwater-report
 
 ### Usage
 
-These script are used to generate twice yearly reports for the Provincial Ground Water Observation Network (PGOWN). Reports rely on raw data provided by Jillian Kelly, (Jillian.Kelly@gov.bc.ca).
+These script are used to generate twice yearly reports for the Provincial Ground Water Observation Network (PGOWN). Reports rely on raw data provided by Jillian Kelly
 
 There are four core scripts that are required for the analysis and to produce the report, they need to be run in order:
 
