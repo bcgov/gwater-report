@@ -32,13 +32,6 @@ wells_joined <- wells_joined %>%
   select(-c(GW_WW_SYSID, WELL_DETAILS_URL))
 
 
-wells_regions <- wells_regions %>%
-  mutate(Region = gsub("/","_", Region),
-         Region = ifelse(Region == "Lower Mainland", "South Coast",
-                         ifelse(Region == "Vancouver Island", "West Coast",
-                                ifelse(Region == "Ominca_Peace" , "Omineca_Peace", Region ))))
-
-
 wells.df <- data.frame(wells_joined)
 
 # number of wells per regions over time.
@@ -58,7 +51,7 @@ well.stats  <- wells.df %>%
 
 
 well.stats$Region = factor(well.stats$Region, ordered = TRUE,
-                           levels = c("Skeena", "Omineca_Peace", "Okanagan_Kootenay","Cariboo_Thompson",
+                           levels = c("Skeena", "Omineca_Peace", "Okanagan_Kootenay","Thompson_Cariboo",
                                       "South Coast", "West Coast"))
 
 

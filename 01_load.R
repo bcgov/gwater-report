@@ -31,7 +31,7 @@ library(mapview)
 library(bcmaps)
 
 wfile <- file.path("data",
-                   "MASTER_Metrics for Publicly Available PGOWN Validated Data.xlsx")
+                   "MASTER_Metrics for Publicly Available PGOWN Validated DataV2.xlsx")
 
 #wfile <- file.path(
 #  soe_path("Operations ORCS/Special Projects/Water Program/Groundwater Wells Reporting/Data"),
@@ -39,12 +39,11 @@ wfile <- file.path("data",
 #)
 
 # Read in the data from Excel sheet using feb 2019 as base
-
 wdata_0219 <- read_excel(wfile, sheet = "Feb 2019", range = "A2:J228",
-                    col_names = c("Region", "Data_graded", "Well_ID", "Location",
-                                  "Date_Validated", "Months_since_val", "foo","initial_cost","foo1", "comment"),
-                    col_types = c("text", "text", "text","text", "date", "text",
-                                  "text", "text", "text","text")) %>%
+                         col_names = c("Region", "Data_graded", "Well_ID", "Location",
+                                       "Date_Validated", "Months_since_val", "foo","initial_cost","foo1", "comment"),
+                         col_types = c("text", "text", "text","text", "date", "text",
+                                       "text", "text", "text","text")) %>%
   select(-c("foo", "foo1")) %>%
   mutate(Region = ifelse(str_detect(Region, "%"),NA , Region),
          Region = ifelse(str_detect(Region, "Total"),NA , Region),
@@ -53,13 +52,17 @@ wdata_0219 <- read_excel(wfile, sheet = "Feb 2019", range = "A2:J228",
   fill(Region) %>%
   filter_at(.vars = vars(Data_graded, Well_ID), .vars_predicate = any_vars(!is.na(.))) %>%
   mutate(report_date = "2019-02-01",
-        dateCheck = round(interval(ymd(Date_Validated),
-                                         ymd("2019-02-01"))/ months(1), 0))
+         dateCheck = round(interval(ymd(Date_Validated),
+                                    ymd("2019-02-01"))/ months(1), 0))
 
 # create a well_key for each time slice
+well_key <- read_excel(wfile, sheet = "Regions",
+           col_names = c("Region", "Well_ID", "Location"),
+           col_types = c("text", "text", "text")) %>%
+  mutate(Well_ID = as.integer(gsub("^#", "", Well_ID)))
 
-well_key <- wdata_0219 %>%
-  select(Region, Well_ID, Location)
+#well_key <- wdata_0219 %>%
+#  select(Region, Well_ID, Location)
 
 # function 1 to read in Feb 2020 sheets and beyond.
 
@@ -88,6 +91,9 @@ get_well_data_2020 = function(sheet, range, report_date) {
 wdata_0220 <- get_well_data_2020(sheet = "Feb 2020" , range = "E2:O238" , report_date = "2020-02-01")
 wdata_0720 <- get_well_data_2020(sheet = "July 2020" , range = "E2:O241" , report_date = "2020-07-01")
 
+#* added jkrogh Feb 2021
+wdata_0221 <- get_well_data_2020(sheet = "Feb 2021" , range = "E2:O244" , report_date = "2021-02-01")
+#*
 
 # functions to format datasets (July 2018- July 2019)
 
@@ -112,7 +118,7 @@ get_well_data_graded = function(sheet, range, report_date) {
 wdata_0718 <- get_well_data_graded(sheet = "July 2018", range = "B2:J219", report_date = "2018-07-01")
 wdata_0719 <- get_well_data_graded(sheet = "July 2019 ", range = "E2:M236", report_date = "2019-07-01")
 
-wdata <- bind_rows(wdata_0219, wdata_0718, wdata_0719, wdata_0220, wdata_0720)
+wdata <- bind_rows(wdata_0219, wdata_0718, wdata_0719, wdata_0220, wdata_0720, wdata_0221)
 
 # functions to format datasets (Feb 2015 - Feb 2018)
 
@@ -169,17 +175,17 @@ rm(wdata_0219, wdata_0218, wdata_0717,wdata_0217,
 
 region_table <- tribble(
   ~ Location, ~ Region2,
-  "Merrit", "Cariboo/Thompson",
+  "Merrit", "Thompson/Cariboo",
   "Joe Rich", "Okanagan/Kootenay",
   "Pemberton", "Lower Mainland",
   "Deroche", "Lower Mainland",
   "Dewdney", "Lower Mainland",
   "NG-Charlie Lake", "Ominca/Peace",
-  "Canoe Creek", "Cariboo/Thompson",
+  "Canoe Creek", "Thompson/Cariboo",
   "Farmington", "Ominca/Peace",
-  "Junction Sheep", "Cariboo/Thompson",
-  "Shuswamp Lake Park Deep", "Cariboo/Thompson",
-  "Salmon Arm", "Cariboo/Thompson",
+  "Junction Sheep", "Thompson/Cariboo",
+  "Shuswamp Lake Park Deep", "Thompson/Cariboo",
+  "Salmon Arm", "Thompson/Cariboo",
   "Ellison", "Okanagan/Kootenay",
   "Cordova Bay", "Vancouver Island",
   "Fanny Bay", "Vancouver Island",
@@ -187,7 +193,7 @@ region_table <- tribble(
   "Mt Newton", "Vancouver Island",
   "Ootischenia", "Okanagan/Kootenay",
   "Oyster River", "Vancouver Island",
-  "Shuswap","Cariboo/Thompson",
+  "Shuswap","Thompson/Cariboo",
   "Yarrow", "Lower Mainland",
   "Fort Nelson", "Ominca/Peace",
   "Cowichan Station (Koksilah)", "Vancouver Island",
@@ -220,6 +226,11 @@ wdata <- wdata %>%
 wdata <- wdata %>%
  mutate(Region = ifelse(Region == "Lower Mainland", "South Coast",
                         ifelse(Region == "Vancouver Island" , "West Coast", Region)))
+
+# fix weird regions
+wdata <- wdata %>% mutate(Region = case_when(Region == "Ominca/Peace" ~ "Omineca/Peace" ,
+                                             Region == "Cariboo/Thompson" ~ "Thompson/Cariboo",
+                                             TRUE ~ Region))
 
 ## get wells column names
 ##  https://catalogue.data.gov.bc.ca/dataset/e4731a85-ffca-4112-8caf-cb0a96905778
@@ -267,6 +278,7 @@ wells_joined <- wells_joined %>%
 #                           by = c("wells_no" = "Well_ID"))
 bc <- bcmaps::bc_bound()
 
+
 # Create regions based on voronoi tessalation around well locations, grouped by
 # 'Region' attribute and merged
 wells_regions <- st_union(wells_joined) %>%
@@ -278,6 +290,33 @@ wells_regions <- st_union(wells_joined) %>%
   summarise() %>%
   st_intersection(bc) %>%
   mutate()
+
+wells_regions <- wells_regions %>%
+  mutate(Region = gsub("/","_", Region),
+         Region = ifelse(Region == "Lower Mainland", "South Coast",
+                         ifelse(Region == "Vancouver Island", "West Coast",
+                                ifelse(Region == "Ominca_Peace" , "Omineca_Peace", Region ))))
+
+
+## The map was getting the graphs and regions wrong this extra bit of code makes the regions into 6 polygons instead of the 163 (due to islands) that is in wells_regions
+SK <- wells_regions %>% filter(Region == "Skeena") %>% st_union() %>% st_sf()
+OK_KO <- wells_regions %>% filter(Region == "Okanagan_Kootenay") %>% st_union()%>% st_sf()
+OM_PE <- wells_regions %>% filter(Region == "Omineca_Peace") %>% st_union()%>% st_sf()
+SC <- wells_regions %>% filter(Region == "South Coast") %>% st_union()%>% st_sf()
+TC <- wells_regions %>% filter(Region == "Thompson_Cariboo") %>% st_union()%>% st_sf()
+WC <- wells_regions %>% filter(Region == "West Coast") %>% st_buffer(dist = 0) %>% st_union()%>% st_sf()
+
+wells_regions <- rbind(OK_KO,OM_PE,SK,SC,TC,WC)
+
+wells_regions$Region <- c("Okanagan_Kootenay",
+                          "Omineca_Peace",
+                          "Skeena",
+                          "South Coast",
+                          "Thompson_Cariboo",
+                          "West Coast")
+
+wells_regions <- cbind(wells_regions[,2], wells_regions[,1])
+wells_regions <- wells_regions[,c(1,2)]
 
 mapview(wells_regions, zcol = "Region") +
   mapview(wells_joined, zcol = "Region", legend = FALSE)

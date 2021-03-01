@@ -14,7 +14,7 @@ library(ggplot2)
 library(dplyr)
 library(gridExtra)
 library(patchwork)
-
+load("tmp/wellsum.RData")
 dir.create("output/plots", recursive = TRUE, showWarnings = FALSE)
 
 # Create and overall plot
@@ -45,6 +45,7 @@ temp_plots <- function(reg.data) {
   p1 <- ggplot(reg.data, aes(report_date, 100 - pc.gth.7)) +
     geom_bar(stat = "identity") +
     ylim(0,100) +
+    scale_x_date(date_breaks = "year", date_labels = "%Y") +
    # geom_text(aes(label=no.active.wells), vjust = -1) +
     labs(title = "% Active Well Data Validated Within 7 months",
          x = "time", y = "Percentage of wells")
@@ -59,7 +60,7 @@ plots <- for (n in reg_list) {
   reg.data <- well.stats %>% filter(Region == n)
   p <- temp_plots(reg.data)
   #name = gsub("/","_",n )
-  ggsave(p, file = paste0("output/plots/",n, ".svg"))
+  ggsave(p, file = paste0("output/plots/",n, ".png"))
   reg_plot_list [[n]] <- p
 }
 

@@ -1,6 +1,6 @@
 ---
 title: "Provincial Groundwater Observation Well Network (PGOWN)"
-subtitle: "Snapshot Report : August 2020"
+subtitle: "Snapshot Report : February 2021"
 output: html_document
      
 ---
@@ -75,7 +75,7 @@ p1 <- well.stats %>% group_by(report_date) %>% summarize(no.active = sum(no.acti
 p1
 ```
 
-```{r provincial plots 2, include = TRUE, echo= FALSE, fig.align="left", fig.height=3, fig.width = 8}
+```{r provincial plots 2, eval = F, include = TRUE, echo= FALSE, fig.align="left", fig.height=3, fig.width = 8}
 y.lim.max <- 50
 
 p2 <- ggplot(well.stats, aes(report_date, mth.ave, fill = Region)) +
@@ -156,7 +156,6 @@ Click on the maps below to explore the trends across the province.
 ```{r, echo = FALSE}
 
  library(leaflet)
- 
 
 # create labels 
 
@@ -185,8 +184,10 @@ Click on the maps below to explore the trends across the province.
   
  popup_reg <- popupGraph(reg_plot_list[unique(well.stats$Region)], 
                           type = "svg", width = 400, height = 300)
-  
 
+ #This order is needed to make the popup_reg map to the correct region polygons
+ popup_reg <- popup_reg[c(3,2,1,5,4,6)]
+ 
  popup_well <- dplyr::select(wells_joined, Location, 
                              OBSERVATION_WELL_NUMBER,
                              Months_since_val
@@ -204,8 +205,16 @@ wells_popup <- leafpop::popupTable(popup_well ,
                                    feature.id = F)
   
   
-  
- palette1 <- colorFactor(palette = 'viridis', wells_regions$Region, reverse = TRUE)
+
+#set the factors for the colours, this seems to have no impact on the matching of popup_reg and regions 
+wells_regions$Region <- factor(wells_regions$Region, levels = c("Thompson_Cariboo",
+                                                                      "Okanagan_Kootenay",
+                                                                      "Omineca_Peace",
+                                                                      "Skeena",
+                                                                      "South Coast",
+                                                                     "West Coast"))
+
+palette1 <- colorFactor(palette = 'viridis', wells_regions$Region, reverse = TRUE)
 # palette2 <-  colorFactor(palette = "Blues", domain = wells_joined$map_colour)
  palette2 <-  colorFactor(palette = c("dark green","dark red"), levels = c("green", "red"))
 
@@ -247,7 +256,7 @@ wells_popup <- leafpop::popupTable(popup_well ,
 
 ## Caveats 
 
-*This assessment was completed July 7 and 8, 2020 and is current as of this date.
+*This assessment was completed Feb 23, 2021 and is current as of this date.
 
 ### Method: 
 All active PGOWN wells publicly available on the [PGOWN Interactive Map](https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=b53cb0bf3f6848e79d66ffd09b74f00d) are assessed on a region-by-region basis. The water level data is downloaded for each well and the last month that the data is categorized as validated, is noted. For each region, the % of wells in that region with validated data greater than 7 months old is determined. For each region, the average age of data is determined based on the number of wells displayed on the interactive map at the time of the snapshot and the total age (in months) of the validated data.
