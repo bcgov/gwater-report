@@ -1,6 +1,6 @@
 ---
 title: "Provincial Groundwater Observation Well Network (PGOWN)"
-subtitle: "Snapshot Report : February 2021"
+subtitle: "Snapshot Report : July 2021"
 output: html_document
      
 ---
@@ -70,10 +70,42 @@ p1 <- well.stats %>% group_by(report_date) %>% summarize(no.active = sum(no.acti
     geom_bar(stat = "identity") +
     ylab("Number of Active Wells") +
     xlab("") +
+    coord_cartesian(ylim = c(100, 250)) +
     ggtitle("Number of Active Provincial Monitoring Wells") + 
-    scale_fill_brewer(palette = "accent")
+    scale_fill_brewer(palette = "accent") +
+    geom_text(aes(label = no.active), vjust = -0.5) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
 p1
 ```
+
+### Months Since Validation by Region
+
+```{r Region Box whisker plot, include = TRUE, echo= FALSE, fig.align="left", fig.height=3, fig.width = 6.4}
+#define the location of tick marks along the date axis (Feb/Jul)
+date.ticks <- unique(well.stats$report_date)
+date.ticks <- sort(date.ticks)
+
+o <- function(x) {
+  subset(x, x == max(x) | x == min(x))
+}
+
+f <- function(x) {
+  r <- quantile(x, probs = c(0.00, 0.25, 0.5, 0.75, 1))
+  names(r) <- c("ymin", "lower", "middle", "upper", "ymax")
+  r
+}
+
+
+p2 <- wdata %>% filter(report_date == "2021-07-01") %>%
+ggplot(aes(x = Region, y = Months_since_val)) + 
+  stat_summary(fun.y = o, geom="line") +
+  stat_summary(fun.data=f, geom="boxplot")+
+  geom_hline(yintercept = 7, colour = "red", linetype = "dashed") +
+  ylab("Number of Months Since Validation")
+
+p2
+```
+The vertical lines extend from the minimum to the maximum data age, the box contains the range of ages where 50% of the wells fall, the black horizontal lines within each box is the median age. The horizontal dotted red line is the seven month target.
 
 ```{r provincial plots 2, eval = F, include = TRUE, echo= FALSE, fig.align="left", fig.height=3, fig.width = 8}
 y.lim.max <- 50
@@ -88,7 +120,7 @@ p2 <- ggplot(well.stats, aes(report_date, mth.ave, fill = Region)) +
   xlab("") +
   theme(legend.position="right") +
   ggtitle("Average Number of Months Since Water Level Data Validation")+
-  scale_fill_brewer(palette = "Accent") #(values=wes_palette(n=3,
+  scale_fill_brewer(palette = "Dark") #(values=wes_palette(n=3,
         
  p2 + 
 #   annotate("text",y=10,x=max(well.stats$report_date),size=20,label=c('target', colour = "red"))
@@ -110,9 +142,19 @@ p3 <- ggplot(well.stats, aes(report_date, 100 - pc.gth.7, fill = Region)) +
   scale_fill_brewer(palette = "Accent") + #(values=wes_palette(n=3,
   ylim(0,100)
 
+#p3
+
+p3<-ggplot(well.stats, aes(report_date, 100 - pc.gth.7, colour = Region)) +
+  geom_point() +
+  geom_line() +
+  scale_x_date(breaks = date.ticks, date_labels = "%b-%y")+
+  ylab("%") +
+  xlab("") +
+  theme(legend.position="right") +
+  ggtitle("Percent of Wells Meeting the 7 Month Target") +
+  scale_colour_brewer(palette = "Dark2") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 p3
-
-
 ```
 
 
@@ -134,7 +176,9 @@ p4 <- ggplot(graded_data, aes(report_date, pc.grad, color = Region, fill = Regio
   xlab("") +
   theme(legend.position="right") +
   ggtitle("Percent of Wells With Graded Water Level Data") +
-  scale_fill_brewer(palette = "Accent") #(values=wes_palette(n=3,
+  #labs(caption = "") +
+  theme(plot.caption = element_text(hjust = 0, size = 9, vjust = 1))+
+  scale_fill_brewer(palette = "Dark2") #(values=wes_palette(n=3,
       
 
 
@@ -143,11 +187,10 @@ p4
 
 ```
 
-Grading of water level data was implemented in January 2016.
-
+Grading of water level data was implemented in January 2016. There is currently no graded data available for West Coast.
 
 ## Interactive Map 
-Click on the maps below to explore the trends across the province.
+Click on the map below to explore the trends across the province. The blue dots are wells with validated data 7 months old or less. The red dots are wells with validated data 8 months old or greater.
 
 # {.tabset .tabset-fade}
 
@@ -207,16 +250,23 @@ wells_popup <- leafpop::popupTable(popup_well ,
   
 
 #set the factors for the colours, this seems to have no impact on the matching of popup_reg and regions 
-wells_regions$Region <- factor(wells_regions$Region, levels = c("Thompson_Cariboo",
-                                                                      "Okanagan_Kootenay",
-                                                                      "Omineca_Peace",
-                                                                      "Skeena",
-                                                                      "South Coast",
-                                                                     "West Coast"))
+# wells_regions$Region <- factor(wells_regions$Region, levels = c("Thompson_Cariboo",
+#                                                                       "Okanagan_Kootenay",
+#                                                                       "Omineca_Peace",
+#                                                                       "Skeena",
+#                                                                       "South Coast",
+#                                                                      "West Coast"))
 
-palette1 <- colorFactor(palette = 'viridis', wells_regions$Region, reverse = TRUE)
+wells_regions$Region <- factor(wells_regions$Region, levels = c("Skeena",
+                                                                "Omineca_Peace",
+                                                                "Okanagan_Kootenay",
+                                                                "Thompson_Cariboo",
+                                                                "South Coast",
+                                                                "West Coast"))
+
+palette1 <- colorFactor(palette = 'Dark2', wells_regions$Region)#, reverse = TRUE)
 # palette2 <-  colorFactor(palette = "Blues", domain = wells_joined$map_colour)
- palette2 <-  colorFactor(palette = c("dark green","dark red"), levels = c("green", "red"))
+# palette2 <-  colorFactor(palette = c("cyan","dark red"), levels = c("cyan", "red"))
 
  
  watermap <- leaflet(width = "900px", height = "600px", 
@@ -240,14 +290,14 @@ palette1 <- colorFactor(palette = 'viridis', wells_regions$Region, reverse = TRU
                  autoPanPaddingTopLeft = c(120, 20),
                  autoPanPaddingBottomRight = c(150,20)),
                labelOptions = labelOptions(direction = "auto", textsize = "12px")) %>%
-      addCircles(data = wells_joined, radius = 10, 
+      addCircles(data = wells_joined, radius = 5, weight = 10, 
                #fillColor = ~palette2(wells_joined$map_colour),
                color = wells_joined$map_colour,
                opacity = 0.9,
                popup = wells_popup,
                label = lapply(lab2, htmltools::HTML),
                highlightOptions = highlightOptions( 
-                 weight = 3,
+                 weight = 10,
                  color = "yellow",
                  bringToFront = T))
  
@@ -256,7 +306,7 @@ palette1 <- colorFactor(palette = 'viridis', wells_regions$Region, reverse = TRU
 
 ## Caveats 
 
-*This assessment was completed Feb 23, 2021 and is current as of this date.
+*This assessment was completed July 9, 2021 and is current as of this date.
 
 ### Method: 
 All active PGOWN wells publicly available on the [PGOWN Interactive Map](https://governmentofbc.maps.arcgis.com/apps/webappviewer/index.html?id=b53cb0bf3f6848e79d66ffd09b74f00d) are assessed on a region-by-region basis. The water level data is downloaded for each well and the last month that the data is categorized as validated, is noted. For each region, the % of wells in that region with validated data greater than 7 months old is determined. For each region, the average age of data is determined based on the number of wells displayed on the interactive map at the time of the snapshot and the total age (in months) of the validated data.

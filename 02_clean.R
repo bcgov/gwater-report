@@ -84,7 +84,7 @@ well.table <- well.stats %>%
 wells_joined  <- wells_joined %>%
   group_by(OBSERVATION_WELL_NUMBER) %>%
   filter(report_date == reporting_date & inactive == "N") %>%
-  mutate(map_colour = ifelse(Months_since_val > 7, "red", "green")) %>%
+  mutate(map_colour = ifelse(Months_since_val > 7, "red", "cyan")) %>%
   ungroup()
 
 save(list = ls(), file = "tmp/wellsum.RData")

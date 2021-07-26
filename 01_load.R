@@ -31,7 +31,7 @@ library(mapview)
 library(bcmaps)
 
 wfile <- file.path("data",
-                   "MASTER_Metrics for Publicly Available PGOWN Validated DataV2.xlsx")
+                   "MASTER_Metrics for Publicly Available PGOWN Validated Data July2021.xlsx")
 
 #wfile <- file.path(
 #  soe_path("Operations ORCS/Special Projects/Water Program/Groundwater Wells Reporting/Data"),
@@ -84,15 +84,19 @@ get_well_data_2020 = function(sheet, range, report_date) {
     mutate(report_date = report_date,
            dateCheck = round(interval(ymd(Date_Validated),
                                       ymd(report_date))/ months(1), 0)) %>%
-    left_join(well_key)
+    left_join(well_key, by = "Well_ID") %>% select(-c("Location.y")) %>%
+    rename("Location" = "Location.x") %>% unique() #something weird is going on with the left_join I can't figure it out
 }
 
 
-wdata_0220 <- get_well_data_2020(sheet = "Feb 2020" , range = "E2:O238" , report_date = "2020-02-01")
-wdata_0720 <- get_well_data_2020(sheet = "July 2020" , range = "E2:O241" , report_date = "2020-07-01")
+wdata_0220 <- get_well_data_2020(sheet = "Feb 2020" , range = "E2:O238", report_date = "2020-02-01")
+wdata_0720 <- get_well_data_2020(sheet = "July 2020" , range = "E2:O241", report_date = "2020-07-01")
 
 #* added jkrogh Feb 2021
 wdata_0221 <- get_well_data_2020(sheet = "Feb 2021" , range = "E2:O244" , report_date = "2021-02-01")
+
+#* Added jkrogh July 2021
+wdata_0721 <- get_well_data_2020(sheet = "July 2021" , range = "E2:O248" , report_date = "2021-07-01")
 #*
 
 # functions to format datasets (July 2018- July 2019)
@@ -118,7 +122,7 @@ get_well_data_graded = function(sheet, range, report_date) {
 wdata_0718 <- get_well_data_graded(sheet = "July 2018", range = "B2:J219", report_date = "2018-07-01")
 wdata_0719 <- get_well_data_graded(sheet = "July 2019 ", range = "E2:M236", report_date = "2019-07-01")
 
-wdata <- bind_rows(wdata_0219, wdata_0718, wdata_0719, wdata_0220, wdata_0720, wdata_0221)
+wdata <- bind_rows(wdata_0219, wdata_0718, wdata_0719, wdata_0220, wdata_0720, wdata_0221, wdata_0721)
 
 # functions to format datasets (Feb 2015 - Feb 2018)
 
@@ -240,12 +244,17 @@ wdata <- wdata %>% mutate(Region = case_when(Region == "Ominca/Peace" ~ "Omineca
 
 # Get the wells which have an OBSERVATION_WELL_NUMBER (and thus are part of PGOWN)
 wells <- bcdc_query_geodata("e4731a85-ffca-4112-8caf-cb0a96905778") %>%
-  filter(!is.na(OBSERVATION_WELL_NUMBER)) %>%
+  #filter() %>% collect()
+  filter(!is.na(OBSERVATION_WELL_NUMBER) | WELL_TAG_NUMBER == 61559) %>%
+  filter(!(WELL_TAG_NUMBER == 93712)) %>%
   select(OBSERVATION_WELL_NUMBER, #MINISTRY_OBSERVATION_WELL_STAT,
          WELL_DETAILS_URL) %>%
   collect() %>%
   mutate(wells_no = as.numeric(as.character(OBSERVATION_WELL_NUMBER)))
 
+# Manually add obs well 494 which isn't yet in the geo warehouse
+wells$OBSERVATION_WELL_NUMBER[wells$GW_WW_SYSID == 61405] = 494
+wells$wells_no[wells$GW_WW_SYSID == 61405] = 494
 
 # start of temp fix -------------------------------------------------------
 # note : temporary using a fix with a csv with lat longs while wms is down.
@@ -258,8 +267,10 @@ wells <- bcdc_query_geodata("e4731a85-ffca-4112-8caf-cb0a96905778") %>%
 
 # end of temp fix ---------------------------------------------------------
 
+
 wells_joined <- right_join(wells, wdata ,
                           by = c("wells_no" = "Well_ID"))
+
 
 ##Note the well # 365 Shuswamp Lake Park Deep has two GPS locations in the file.
 ##As the map is a course scale - selecting the first
@@ -271,8 +282,8 @@ duplicate <- wells_joined %>%
 
 # this has uncovered more problems with the data as to error in names and duplicate
 # well id values
-wells_joined <- wells_joined %>%
-  filter(!OBJECTID == 18024672)
+#wells_joined <- wells_joined %>%
+#  filter(!OBJECTID == 45143748) #<- this id number changed?
 
 #wells_joined <- full_join(wells, wdata ,
 #                           by = c("wells_no" = "Well_ID"))
